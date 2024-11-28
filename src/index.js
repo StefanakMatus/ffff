@@ -258,7 +258,7 @@ app.post('/admin/update-state-and-note', (req, res) => {
     const { row_id, state, note,user_id_dc } = req.body;
 
     // Ensure that required fields are provided
-    if (!row_id || !state || !note) {
+    if (!row_id || !state || !note || !user_id_dc) {
         return res.status(400).send('Missing required fields: row_id, state or note');
     }
 
@@ -276,7 +276,7 @@ app.post('/admin/update-state-and-note', (req, res) => {
         // Send a success response
         res.json({ message: 'State and note updated successfully' });
 
-
+        console.log(user_id_dc);
         // Fetch the user from Discord and send a message
         client.users.fetch(user_id_dc)
             .then(user => {

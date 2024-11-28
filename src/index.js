@@ -165,7 +165,7 @@ app.get('/admin', (req, res) => {
         return res.redirect('/login');  // Redirect to login if not authenticated
     }
 
-    console("DB??:" + db);
+    console.log("DB??:" + db);
     db.connect((err) => {
         if (err) {
             console.error('Database connection error:', err);
@@ -190,7 +190,7 @@ app.get('/user', (req, res) => {
         return res.redirect('/login');  // Redirect to login if not authenticated
     }
 
-    console("DB??:" + db);
+    console.log("DB??:" + db);
     db.connect((err) => {
         if (err) {
             console.error('Database connection error:', err);

@@ -189,7 +189,8 @@
                                 body: JSON.stringify({
                                     row_id: row.id,
                                     state: newState,
-                                    note: newNote
+                                    note: newNote,
+                                    user_id_dc: row.user_id
                                 })
                             })
                             .then(response => response.json())

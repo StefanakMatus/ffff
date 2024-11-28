@@ -255,7 +255,7 @@ app.post('/admin/update-state-and-note', (req, res) => {
         return res.status(403).send('<h1>Access Denied</h1><p>You do not have permission to update the state or note.</p>');
     }
 
-    const { row_id, state, note } = req.body;
+    const { row_id, state, note,user_id_dc } = req.body;
 
     // Ensure that required fields are provided
     if (!row_id || !state || !note) {
@@ -276,11 +276,9 @@ app.post('/admin/update-state-and-note', (req, res) => {
         // Send a success response
         res.json({ message: 'State and note updated successfully' });
 
-        // Send a direct message to the user on Discord
-        const userId = req.user.id;  // Get the authenticated user
 
         // Fetch the user from Discord and send a message
-        client.users.fetch(userId)
+        client.users.fetch(user_id_dc)
             .then(user => {
                 // Send a DM to the user
                 user.send(`Your form submission has been updated! State: ${state}, Note: ${note}`)

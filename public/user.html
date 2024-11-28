@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User</title>
+</head>
+<body>
+    <h1>User Stuff</h1>
+    
+    <!-- Button to show the form -->
+    <button onclick="showForm()">Dotaznik</button>
+
+    <!-- The form will be hidden initially -->
+    <div id="form-container" style="display:none;">
+        <form action="/submit-form" method="POST">
+            <label for="field1">Field 1:</label>
+            <input type="text" id="field1" name="field1" required><br><br>
+
+            <label for="field2">Field 2:</label>
+            <input type="text" id="field2" name="field2" required><br><br>
+
+            <!-- Dropdown (select) -->
+            <label for="options">Choose an option:</label>
+            <select id="options" name="options" required>
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <option value="option3">Option 3</option>
+            </select><br><br>
+
+            <!-- Radio buttons -->
+            <label>Choose one of the following:</label><br>
+            <input type="radio" id="radio1" name="radio" value="radio1" required>
+            <label for="radio1">Radio Option 1</label><br>
+            
+            <input type="radio" id="radio2" name="radio" value="radio2" required>
+            <label for="radio2">Radio Option 2</label><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        // JavaScript function to show the form
+        function showForm() {
+            const formContainer = document.getElementById("form-container");
+            formContainer.style.display = "block"; // Show the form
+        }
+    </script>
+</body>
+</html>

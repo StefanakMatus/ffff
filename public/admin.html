@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        /* Basic styling for the body and the table */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            cursor: pointer;
+            color: #444;
+        }
+
+        th:hover {
+            background-color: #e9e9e9;
+        }
+
+        td input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        td select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .actions-button {
+            text-align: center;
+            padding: 0;
+        }
+
+        /* Adjust the widths to ensure the note and actions fields align properly */
+        td:nth-child(11) {
+            width: 200px; /* Set a fixed width for the Note column */
+        }
+
+        td:nth-child(12) {
+            width: 150px; /* Set a fixed width for the Actions column */
+        }
+
+        /* Adding some space between note and actions columns */
+        td:nth-child(11), td:nth-child(12) {
+            padding-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel - Form Submissions</h1>
+    <table border="1" id="formDataTable">
+        <thead>
+            <tr>
+                <th id="sortById" style="cursor: pointer;">ID</th> <!-- Sortable -->
+                <th>Field 1</th>
+                <th>Field 2</th>
+                <th>Options</th>
+                <th>Radio</th>
+                <th id="sortByUsername" style="cursor: pointer;">Username</th> <!-- Sortable -->
+                <th>User ID</th>
+                <th>Roles</th>
+                <th id="sortByTime" style="cursor: pointer;">Time</th> <!-- Sortable -->
+                <th id="sortByState" style="cursor: pointer;">State</th> <!-- Sortable -->
+                <th>Note</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        fetch('/admin/data')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('formDataTable').getElementsByTagName('tbody')[0];
+
+                // Function to render table rows based on data
+                function renderTable(data) {
+                    tableBody.innerHTML = ''; // Clear the table body
+                    data.forEach(row => {
+                        const newRow = tableBody.insertRow();
+
+                        // Add ID column
+                        newRow.insertCell().textContent = row.id;
+
+                        // Add other columns
+                        newRow.insertCell().textContent = row.field1;
+                        newRow.insertCell().textContent = row.field2;
+                        newRow.insertCell().textContent = row.options;
+                        newRow.insertCell().textContent = row.radio;
+                        newRow.insertCell().textContent = row.username;
+                        newRow.insertCell().textContent = row.user_id;
+                        newRow.insertCell().textContent = row.roles;
+                        newRow.insertCell().textContent = new Date(row.time).toLocaleString();
+
+                        // Add State column with dropdown for changing state
+                        const stateCell = newRow.insertCell();
+                        const stateSelect = document.createElement('select');
+                        const states = ['pending', 'approved', 'rejected'];  // Define available states
+                        states.forEach(state => {
+                            const option = document.createElement('option');
+                            option.value = state;
+                            option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+                            if (row.state === state) {
+                                option.selected = true;  // Set the current state as selected
+                            }
+                            stateSelect.appendChild(option);
+                        });
+                        stateCell.appendChild(stateSelect);
+
+                        // Add the editable Note field
+                        const noteCell = newRow.insertCell();
+                        const noteInput = document.createElement('input');
+                        noteInput.type = 'text';
+                        noteInput.value = row.note || ''; // Set the current note (empty if no note)
+                        noteCell.appendChild(noteInput);
+
+                        // Add a button to update the state and note
+                        const updateButtonCell = newRow.insertCell();
+                        const updateButton = document.createElement('button');
+                        updateButton.textContent = 'Update State & Note';
+                        updateButtonCell.appendChild(updateButton);
+
+                        // Add event listener for the button to handle state and note update
+                        updateButton.addEventListener('click', () => {
+                            const newState = stateSelect.value;
+                            const newNote = noteInput.value;
+
+                            // Check if the note is empty
+                            if (!newNote.trim()) {
+                                alert('Note cannot be empty!');
+                                return;
+                            }
+
+                            // Send the updated data to the backend
+                            fetch('/admin/update-state-and-note', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    row_id: row.id,
+                                    state: newState,
+                                    note: newNote
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                alert(result.message);  // Show success message
+                            })
+                            .catch(error => {
+                                console.error('Error updating state and note:', error);
+                                alert('Error updating state and note');
+                            });
+                        });
+                    });
+                }
+
+                // Initial render of table data
+                renderTable(data);
+
+                // Sorting function for table rows based on column index
+                function sortTableByColumn(index, ascending = true) {
+                    const sortedData = [...data].sort((a, b) => {
+                        let aValue = Object.values(a)[index];
+                        let bValue = Object.values(b)[index];
+
+                        // Convert the time value to a comparable format if needed
+                        if (index === 8) {  // Time column (index 8)
+                            aValue = new Date(aValue);
+                            bValue = new Date(bValue);
+                        }
+
+                        // Handle sorting logic (string, number, etc.)
+                        if (typeof aValue === 'string' && typeof bValue === 'string') {
+                            return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                        } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+                            return ascending ? aValue - bValue : bValue - aValue;
+                        } else if (aValue instanceof Date && bValue instanceof Date) {
+                            return ascending ? aValue - bValue : bValue - aValue;
+                        }
+                        return 0;
+                    });
+
+                    renderTable(sortedData); // Re-render the table with sorted data
+                }
+
+                // Variable to keep track of sort directions
+                let sortDirections = {
+                    0: true, // ID
+                    5: true, // Username
+                    8: true, // Time
+                    9: true  // State
+                };
+
+                // Event listeners for sorting on selected columns with toggle for ascending/descending
+                document.getElementById('sortById').addEventListener('click', () => {
+                    sortDirections[0] = !sortDirections[0];
+                    sortTableByColumn(0, sortDirections[0]);
+                });
+
+                document.getElementById('sortByUsername').addEventListener('click', () => {
+                    sortDirections[5] = !sortDirections[5];
+                    sortTableByColumn(5, sortDirections[5]);
+                });
+
+                document.getElementById('sortByTime').addEventListener('click', () => {
+                    sortDirections[8] = !sortDirections[8];
+                    sortTableByColumn(8, sortDirections[8]);
+                });
+
+                document.getElementById('sortByState').addEventListener('click', () => {
+                    sortDirections[9] = !sortDirections[9];
+                    sortTableByColumn(9, sortDirections[9]);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching form data:', error);
+                alert('Error fetching form data');
+            });
+    </script>
+</body>
+</html>

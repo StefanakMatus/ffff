@@ -33,7 +33,7 @@ const db = mysql.createConnection({
     user: process.env.DB_USER,  // Your database username
     password: process.env.DB_PASSWORD,  // Your database password
     database: process.env.DB_NAME,  // Your database name
-    charset: 'UTF8'  // Ensures UTF-8 encoding
+    charset: 'UTF-8'  // Ensures UTF-8 encoding
 });
 
 db.connect((err) => {

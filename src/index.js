@@ -165,6 +165,16 @@ app.get('/admin', (req, res) => {
         return res.redirect('/login');  // Redirect to login if not authenticated
     }
 
+    console("DB??:" + db);
+    db.connect((err) => {
+        if (err) {
+            console.error('Database connection error:', err);
+            process.exit(1);  // Exit if connection fails
+        } else {
+            console.log('Connected to MySQL database');
+        }
+    });
+
     // Ensure the user is an admin
     if (!req.user.roles || !req.user.roles.includes('god')) {
         return res.status(403).send('<h1>Access Denied</h1><p>You do not have permission to access the admin page.</p>');
@@ -179,6 +189,16 @@ app.get('/user', (req, res) => {
     if (!req.isAuthenticated()) {
         return res.redirect('/login');  // Redirect to login if not authenticated
     }
+
+    console("DB??:" + db);
+    db.connect((err) => {
+        if (err) {
+            console.error('Database connection error:', err);
+            process.exit(1);  // Exit if connection fails
+        } else {
+            console.log('Connected to MySQL database');
+        }
+    });
 
     // Ensure the user has the 'testingBot' role
     if (!req.user.roles || !req.user.roles.includes('testingBot')) {

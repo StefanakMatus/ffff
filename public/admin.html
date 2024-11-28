@@ -95,6 +95,16 @@
 </head>
 <body>
     <h1>Admin Panel - Form Submissions</h1>
+
+    <!-- Filter Section -->
+    <div>
+        <label for="usernameFilter">Filter by Username:</label>
+        <select id="usernameFilter">
+            <option value="">All Users</option>
+        </select>
+    </div>
+
+
     <table border="1" id="formDataTable">
         <thead>
             <tr>
@@ -121,6 +131,19 @@
             .then(response => response.json())
             .then(data => {
                 const tableBody = document.getElementById('formDataTable').getElementsByTagName('tbody')[0];
+
+                const usernameFilter = document.getElementById('usernameFilter');
+
+                // Populate the username filter dropdown
+                function populateUsernameFilter(data) {
+                    const uniqueUsernames = [...new Set(data.map(row => row.username))];
+                    uniqueUsernames.forEach(username => {
+                        const option = document.createElement('option');
+                        option.value = username;
+                        option.textContent = username;
+                        usernameFilter.appendChild(option);
+                    });
+                }
 
                 // Function to render table rows based on data
                 function renderTable(data) {
@@ -206,7 +229,10 @@
                 }
 
                 // Initial render of table data
+
                 renderTable(data);
+                populateUsernameFilter(data);
+
 
                 // Sorting function for table rows based on column index
                 function sortTableByColumn(index, ascending = true) {
@@ -242,7 +268,20 @@
                     9: true  // State
                 };
 
+                // Filter table based on selected username
+                function filterTableByUsername(username) {
+                    const filteredData = username ? data.filter(row => row.username === username) : data;
+                    renderTable(filteredData);
+                }
+                        
                 // Event listeners for sorting on selected columns with toggle for ascending/descending
+
+                // Add event listener to the username filter dropdown
+                usernameFilter.addEventListener('change', () => {
+                    const selectedUsername = usernameFilter.value;
+                    filterTableByUsername(selectedUsername);
+                });
+
                 document.getElementById('sortById').addEventListener('click', () => {
                     sortDirections[0] = !sortDirections[0];
                     sortTableByColumn(0, sortDirections[0]);

@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Client, GatewayIntentBits } from 'discord.js';
+import bodyParser from 'body-parser';
 
 // Derive __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -214,17 +215,42 @@ app.post('/submit-form', async (req, res) => {
         return res.redirect('/login');
     }
 
-    const { field1, field2, options, radio } = req.body;
-    const user = req.user;  // Get the authenticated user
+    const { score, long_answers, state, note } = req.body;
+    const user = req.user;
 
-    // SQL query to insert form data into the 'form_data' table
+
+
+    // Ensure roles are provided, either from user or from the form
+
+    console.log("I got score: " + score);
+    console.log("Long Answers Breakdown:");
+    long_answers.forEach((item, index) => {
+        console.log(`Question ${index + 1}: ${item.question_text}`);
+        console.log(`Answer ${index + 1}: ${item.answer}`);
+        console.log('---'); // Separator for better readability
+    });
+        console.log("Roles:" + user.roles.join(','))
+    console.log("User id: " + user.id);
+    console.log("username: " + user.username);
+
     const query = `
-    INSERT INTO form_data (field1, field2, options, radio, username, user_id, roles, time, state, note)
-    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
-    `;
+    INSERT INTO form_submissions 
+    (score, username, user_id, roles, questions_answers, state, note) 
+    VALUES 
+    (?, ?, ?, ?, ?, ?, ?)
+`;
 
-    const values = [field1, field2, options, radio, user.username, user.id, user.roles.join(','), 'pending', '']; // note is empty by default
+    const values = [
+        score, 
+        user.username, 
+        user.id, 
+        JSON.stringify(user.roles), // Convert roles to JSON string
+        JSON.stringify(long_answers), // Convert questions and answers to JSON string
+        state, 
+        note
+    ];
 
+    // Execute the query
     db.query(query, values, (error, results) => {
         if (error) {
             console.error('Error inserting form data:', error);
@@ -232,9 +258,13 @@ app.post('/submit-form', async (req, res) => {
         }
 
         console.log('Form data inserted into database');
-        return res.redirect('/user');  // Redirect after successful form submission
+        return res.redirect('/user'); // Redirect after successful form submission
     });
+
 });
+
+
+
 
 
 // Route to fetch form data for the admin page
@@ -249,7 +279,7 @@ app.get('/admin/data', (req, res) => {
     }
 
     // SQL query to retrieve form data
-    const query = 'SELECT * FROM form_data';
+    const query = 'SELECT * FROM form_submissions';
 
 
     db.query(query, (error, results) => {
@@ -270,6 +300,8 @@ app.post('/admin/update-state-and-note', (req, res) => {
         return res.redirect('/login');
     }
 
+
+    console.log("Do i evne got here?");
     // Ensure the user has the correct role (e.g., 'god')
     if (!req.user.roles || !req.user.roles.includes('god')) {
         return res.status(403).send('<h1>Access Denied</h1><p>You do not have permission to update the state or note.</p>');
@@ -277,13 +309,22 @@ app.post('/admin/update-state-and-note', (req, res) => {
 
     const { row_id, state, note,user_id_dc } = req.body;
 
+
+    /*
+    console.log("row id: " + row_id);
+    console.log("state: " + state);
+    console.log("rnote: " + note);
+    console.log("user_id_dc: " + user_id_dc);
+    console.log(typeof user_id_dc);
+    */
+
     // Ensure that required fields are provided
     if (!row_id || !state || !note || !user_id_dc) {
         return res.status(400).send('Missing required fields: row_id, state or note');
     }
 
     // SQL query to update both the state and note
-    const query = 'UPDATE form_data SET state = ?, note = ? WHERE id = ?';
+    const query = 'UPDATE form_submissions SET state = ?, note = ? WHERE id = ?';
     const values = [state, note, row_id];
 
     // Perform the database query
@@ -298,7 +339,7 @@ app.post('/admin/update-state-and-note', (req, res) => {
 
         console.log(user_id_dc);
         // Fetch the user from Discord and send a message
-        client.users.fetch(user_id_dc)
+        client.users.fetch(String(user_id_dc))
             .then(user => {
                 // Send a DM to the user
                 user.send(`Your form submission has been updated! State: ${state}, Note: ${note}`)
@@ -315,10 +356,6 @@ app.post('/admin/update-state-and-note', (req, res) => {
     });
 });
 
-
-
-
-
 // Default route - automatically redirects to /dashboard if logged in
 app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
@@ -327,6 +364,93 @@ app.get('/', (req, res) => {
         return res.redirect('/login');  // If not logged in, redirect to login
     }
 });
+
+
+app.get('/user/questions', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/login');  // Redirect to login if not authenticated
+    }
+
+    // Assuming you store previously selected question IDs in an array
+    const previousSelectedIds = []; // Example of previous IDs
+
+    // If there are no previous selected IDs, fetch all questions
+    let query = `
+    SELECT * 
+    FROM questions 
+    ORDER BY RAND() 
+    LIMIT 10
+    `;
+
+    // If there are previous selected IDs, add the NOT IN clause
+    if (previousSelectedIds.length > 0) {
+        query = `
+        SELECT * 
+        FROM questions 
+        WHERE id NOT IN (${previousSelectedIds.join(', ')}) 
+        ORDER BY RAND() 
+        LIMIT 10
+        `;
+    }
+
+    db.query(query, (error, results) => {
+        if (error) {
+            console.error('Error fetching form data:', error);
+            return res.status(500).send('Error fetching form data');
+        }
+
+        // Send the form data as JSON with correct_answer field
+        results.forEach(question => {
+            question.correct_answer = question.correct_answer;  // Ensure this field exists
+        });
+        
+        res.json(results);
+    });
+});
+
+app.get('/user/question_long', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/login');  // Redirect to login if not authenticated
+    }
+
+    // Assuming you store previously selected question IDs in an array
+    const previousSelectedIds = []; // Example of previous IDs
+
+    // If there are no previous selected IDs, fetch all questions
+    let query = `
+    SELECT * 
+    FROM question_long 
+    ORDER BY RAND() 
+    LIMIT 5
+    `;
+
+    // If there are previous selected IDs, add the NOT IN clause
+    if (previousSelectedIds.length > 0) {
+        query = `
+        SELECT * 
+        FROM question_long 
+        WHERE id NOT IN (${previousSelectedIds.join(', ')}) 
+        ORDER BY RAND() 
+        LIMIT 5
+        `;
+    }
+
+    db.query(query, (error, results) => {
+        if (error) {
+            console.error('Error fetching form data:', error);
+            return res.status(500).send('Error fetching form data');
+        }
+
+        // Send the form data as JSON with correct_answer field
+        results.forEach(question => {
+            question.correct_answer = question.correct_answer;  // Ensure this field exists
+        });
+        
+        res.json(results);
+    });
+});
+
+
 
 // Server start
 app.listen(3000, () => console.log('App running on http://localhost:3000'));

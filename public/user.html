@@ -1,51 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User</title>
-</head>
-<body>
-    <h1>User Stuff</h1>
-    
-    <!-- Button to show the form -->
-    <button onclick="showForm()">Dotaznik</button>
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Quiz</title>
+      <style>
+         body {
+         font-family: Arial, sans-serif;
+         margin: 0;
+         padding: 0;
+         background-color: #f5f5f5;
+         }
+         .quiz-container {
+         width: 80%;
+         margin: 50px auto;
+         padding: 20px;
+         background-color: #fff;
+         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+         }
+         h1 {
+         text-align: center;
+         color: #333;
+         }
+         .question-container {
+         margin-bottom: 20px;
+         }
+         .question-text {
+         font-size: 18px;
+         margin-bottom: 10px;
+         }
+         label {
+         display: block;
+         margin: 5px 0;
+         }
+         .submit-btn {
+         background-color: #4CAF50;
+         color: white;
+         padding: 10px 20px;
+         border: none;
+         cursor: pointer;
+         font-size: 16px;
+         width: 100%;
+         }
+         .submit-btn:hover {
+         background-color: #45a049;
+         }
+         .result-container {
+         text-align: center;
+         margin-top: 30px;
+         padding: 20px;
+         background-color: #e0f7fa;
+         border-radius: 5px;
+         }
+      </style>
+   </head>
+   <body>
+      <h1>Quiz</h1>
+      <div id="quiz-container" class="quiz-container">
+         <!-- Questions will be dynamically inserted here -->
+      </div>
+      <button id="submit-btn" class="submit-btn">Submit Quiz</button>
+      <div id="result" class="result-container" style="display:none;">
+         <p>Your score is: <span id="score"></span>/15</p>
+         <p id="evaluation"></p>
+      </div>
+      <script>
+         // Function to fetch both quiz question types from the server and display them
+         async function loadQuiz() {
+         try {
+            // Fetch the option-based questions
+            const responseOptions = await fetch('/user/questions');
+            if (!responseOptions.ok) {
+                throw new Error('Failed to fetch option-based questions');
+            }
+         
+            const questionsOptions = await responseOptions.json();
+         
+            // Fetch the long-form questions
+            const responseLong = await fetch('/user/question_long');
+            if (!responseLong.ok) {
+                throw new Error('Failed to fetch long-form questions');
+            }
+         
+            const questionsLong = await responseLong.json();
+         
+            // Get the container where questions will be displayed
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = ''; // Clear any existing content
+         
+            // Display option-based questions
+            questionsOptions.forEach((question) => {
+                const questionElement = document.createElement('div');
+                questionElement.classList.add('question');
+                questionElement.dataset.id = question.id;
+                questionElement.dataset.correct_option = question.correct_option; // Store correct answer
+         
+                // Create the question title
+                const questionTitle = document.createElement('h3');
+                questionTitle.textContent = question.question_text;
+                questionTitle.classList.add('question-text'); // Ensure it matches selector in evaluateQuiz
+                questionElement.appendChild(questionTitle);
+         
+                // Create the options as radio buttons
+                const options = ['option_a', 'option_b', 'option_c', 'option_d'];
+                options.forEach((option) => {
+                    const optionLabel = document.createElement('label');
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = `question-${question.id}`;
+                    optionInput.value = option;
+         
+                    optionLabel.appendChild(optionInput);
+                    optionLabel.appendChild(document.createTextNode(question[option]));
+                    questionElement.appendChild(optionLabel);
+                });
+         
+                // Append the question to the quiz container
+                quizContainer.appendChild(questionElement);
+            });
+         
+            // Display long-form questions
+            questionsLong.forEach((question) => {
+                const questionElement = document.createElement('div');
+                questionElement.classList.add('question');
+                questionElement.dataset.id = question.id;
+         
+                // Create the question title
+                const questionTitle = document.createElement('h3');
+                questionTitle.textContent = question.question_text;
+                questionTitle.classList.add('question-text'); // Ensure it matches selector in evaluateQuiz
+                questionElement.appendChild(questionTitle);
+         
+                // Create a text area for the answer
+                const answerArea = document.createElement('textarea');
+                answerArea.name = `question-long-${question.id}`;
+                answerArea.rows = 5;
+                answerArea.cols = 40;
+                questionElement.appendChild(answerArea);
+         
+                // Append the long question to the quiz container
+                quizContainer.appendChild(questionElement);
+            });
+         
+         } catch (error) {
+            console.error('Error loading quiz:', error);
+         }
+         }
+         
+         
+         async function evaluateQuiz() {
+         const questions = document.querySelectorAll('.question');
+         let score = 0;
+         
+         const longAnswers = []; // Store long-form answers
+         const answers = []; // Store both options-based and long-form answers
+         const questionData = []; // Store questions with their text and answers
+         
+         // Collect answers for option-based questions
+         questions.forEach((question) => {
+         const selectedOption = question.querySelector('input:checked');
+         const correct_option = question.dataset.correct_option;  // Correct answer from data attribute
+         const questionId = question.dataset.id;  // The question ID
+         const questionText = question.querySelector('.question-text').textContent; // Get question text
+         
+         if (selectedOption) {
+             // Check if the selected option matches the correct answer
+             if (selectedOption.value === correct_option) {
+                 score++;
+             }
+             // Store the question, answer, and other related info
+             answers.push({
+                 question_id: questionId,
+                 answer: selectedOption.value,
+                 question_text: questionText, // Include the question text
+                 type: 'option', // Indicate this is an option-based question
+             });
+         }
+         
+         // Collect long-form answers
+         if (question.querySelector('textarea')) {
+             const answer = question.querySelector('textarea').value;
+             longAnswers.push({
+                 question_id: questionId,
+                 answer: answer,
+                 question_text: questionText, // Include the question text
+                 type: 'long', // Indicate this is a long-form question
+             });
+         }
+         });
+         
+         // Combine both sets of answers (for submission)
+         const data = {
+            score: score,
+            long_answers: longAnswers,  // Send long answers with question text
+            state: 'pending',
+            note: '', // Include any note if needed
+         };
+         
 
-    <!-- The form will be hidden initially -->
-    <div id="form-container" style="display:none;">
-        <form action="/submit-form" method="POST">
-            <label for="field1">Field 1:</label>
-            <input type="text" id="field1" name="field1" required><br><br>
-
-            <label for="field2">Field 2:</label>
-            <input type="text" id="field2" name="field2" required><br><br>
-
-            <!-- Dropdown (select) -->
-            <label for="options">Choose an option:</label>
-            <select id="options" name="options" required>
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-                <option value="option3">Option 3</option>
-            </select><br><br>
-
-            <!-- Radio buttons -->
-            <label>Choose one of the following:</label><br>
-            <input type="radio" id="radio1" name="radio" value="radio1" required>
-            <label for="radio1">Radio Option 1</label><br>
-            
-            <input type="radio" id="radio2" name="radio" value="radio2" required>
-            <label for="radio2">Radio Option 2</label><br><br>
-
-            <button type="submit">Submit</button>
-        </form>
-    </div>
-
-    <script>
-        // JavaScript function to show the form
-        function showForm() {
-            const formContainer = document.getElementById("form-container");
-            formContainer.style.display = "block"; // Show the form
-        }
-    </script>
-</body>
+         // Submit the data via POST request
+         try {
+         const response = await fetch('/submit-form', {
+             method: 'POST',
+             headers: {
+                 'Content-Type': 'application/json',
+             },
+             body: JSON.stringify(data),
+         });
+         
+         if (response.ok) {
+             // Redirect to the user page (or any other page you need)
+             window.location.href = '/user';
+         } else {
+             alert('Error submitting quiz data');
+         }
+         } catch (error) {
+         console.error('Error submitting form:', error);
+         alert('Error submitting quiz data');
+         }
+         
+         // Display the result
+         document.getElementById('score').textContent = score;
+         document.getElementById('result').style.display = 'block';
+         }
+         
+         
+         // Load the quiz questions when the page is ready
+         window.onload = loadQuiz;
+         
+         // Attach event listener to submit button
+         document.getElementById('submit-btn').addEventListener('click', evaluateQuiz);
+      </script>
+   </body>
 </html>

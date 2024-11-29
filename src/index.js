@@ -340,7 +340,9 @@ app.post('/admin/update-state-and-note', (req, res) => {
         let user_id = user_id_dc // Convert the number to a string
         user_id = user_id.toString();
         // Fetch the user from Discord and send a message
-        
+
+
+        console.log("User id for discord: " + user_id);
         client.users.fetch(user_id)
             .then(user => {
                 // Send a DM to the user

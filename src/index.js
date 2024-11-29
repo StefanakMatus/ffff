@@ -345,7 +345,7 @@ app.post('/admin/update-state-and-note', (req, res) => {
         client.users.fetch(user_id_dc)
             .then(user => {
                 // Send a DM to the user
-                user.send(`Your form submission has been updated! State: ${state}, Note: ${note}`)
+                user.send(`Your form submission has been updated!\n **State:** ${state}\n **Note:** ${note}\n`)
                     .then(() => {
                         console.log('Message sent to the user');
                     })

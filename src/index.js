@@ -337,9 +337,10 @@ app.post('/admin/update-state-and-note', (req, res) => {
         // Send a success response
         res.json({ message: 'State and note updated successfully' });
 
-        console.log(user_id_dc);
+        user_id_dc = user_id_dc.toString(); // Convert the number to a string
+
         // Fetch the user from Discord and send a message
-        client.users.fetch(String(user_id_dc))
+        client.users.fetch(user_id_dc)
             .then(user => {
                 // Send a DM to the user
                 user.send(`Your form submission has been updated! State: ${state}, Note: ${note}`)

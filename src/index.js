@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Client, GatewayIntentBits } from 'discord.js';
 import bodyParser from 'body-parser';
+import { type } from 'os';
 
 // Derive __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -288,6 +289,8 @@ app.get('/admin/data', (req, res) => {
             return res.status(500).send('Error fetching form data');
         }
 
+        console.log('Fetched data:', results);
+
         // Send the form data as JSON
         res.json(results);
     });
@@ -337,13 +340,9 @@ app.post('/admin/update-state-and-note', (req, res) => {
         // Send a success response
         res.json({ message: 'State and note updated successfully' });
 
-        let user_id = user_id_dc // Convert the number to a string
-        user_id = user_id.toString();
         // Fetch the user from Discord and send a message
 
-
-        console.log("User id for discord: " + user_id);
-        client.users.fetch(user_id)
+        client.users.fetch(user_id_dc)
             .then(user => {
                 // Send a DM to the user
                 user.send(`Your form submission has been updated! State: ${state}, Note: ${note}`)

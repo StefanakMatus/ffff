@@ -287,6 +287,10 @@
     fetch('/admin/data')
     .then(response => response.json())
     .then(data => {
+    data.forEach((item, index) => {
+        console.log(`Item ${index + 1}:`, item);
+    });
+        
        const tableBody = document.getElementById('formDataTable').getElementsByTagName('tbody')[0];
        const usernameFilter = document.getElementById('usernameFilter');
        let filteredData = [...data];  // Keep track of the filtered data

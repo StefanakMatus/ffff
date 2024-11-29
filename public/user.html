@@ -147,84 +147,105 @@
          }
          }
          
-         
          async function evaluateQuiz() {
-         const questions = document.querySelectorAll('.question');
-         let score = 0;
-         
-         const longAnswers = []; // Store long-form answers
-         const answers = []; // Store both options-based and long-form answers
-         const questionData = []; // Store questions with their text and answers
-         
-         // Collect answers for option-based questions
-         questions.forEach((question) => {
-         const selectedOption = question.querySelector('input:checked');
-         const correct_option = question.dataset.correct_option;  // Correct answer from data attribute
-         const questionId = question.dataset.id;  // The question ID
-         const questionText = question.querySelector('.question-text').textContent; // Get question text
-         
-         if (selectedOption) {
-             // Check if the selected option matches the correct answer
-             if (selectedOption.value === correct_option) {
-                 score++;
-             }
-             // Store the question, answer, and other related info
-             answers.push({
-                 question_id: questionId,
-                 answer: selectedOption.value,
-                 question_text: questionText, // Include the question text
-                 type: 'option', // Indicate this is an option-based question
-             });
-         }
-         
-         // Collect long-form answers
-         if (question.querySelector('textarea')) {
-             const answer = question.querySelector('textarea').value;
-             longAnswers.push({
-                 question_id: questionId,
-                 answer: answer,
-                 question_text: questionText, // Include the question text
-                 type: 'long', // Indicate this is a long-form question
-             });
-         }
-         });
-         
-         // Combine both sets of answers (for submission)
-         const data = {
-            score: score,
-            long_answers: longAnswers,  // Send long answers with question text
-            state: 'pending',
-            note: '', // Include any note if needed
-         };
-         
+            const questions = document.querySelectorAll('.question');
+            let score = 0;
+            let formValid = true;
+            let hasUnansweredQuestions = false; // Flag to track if any question is unanswered
 
-         // Submit the data via POST request
-         try {
-         const response = await fetch('/submit-form', {
-             method: 'POST',
-             headers: {
-                 'Content-Type': 'application/json',
-             },
-             body: JSON.stringify(data),
-         });
-         
-         if (response.ok) {
-             // Redirect to the user page (or any other page you need)
-             window.location.href = '/user';
-         } else {
-             alert('Error submitting quiz data');
-         }
-         } catch (error) {
-         console.error('Error submitting form:', error);
-         alert('Error submitting quiz data');
-         }
-         
-         // Display the result
-         document.getElementById('score').textContent = score;
-         document.getElementById('result').style.display = 'block';
-         }
-         
-         
+            const longAnswers = []; // Store long-form answers
+            const answers = []; // Store both options-based and long-form answers
+
+            // Collect answers for option-based questions and validate them
+            questions.forEach((question) => {
+                const selectedOption = question.querySelector('input:checked');
+                const correct_option = question.dataset.correct_option;  // Correct answer from data attribute
+                const questionId = question.dataset.id;  // The question ID
+                const questionText = question.querySelector('.question-text').textContent; // Get question text
+
+                // Check if the question is an option-based one
+                if (selectedOption) {
+                    // Check if the selected option matches the correct answer
+                    if (selectedOption.value === correct_option) {
+                        score++;
+                    }
+                    // Store the question, answer, and other related info
+                    answers.push({
+                        question_id: questionId,
+                        answer: selectedOption.value,
+                        question_text: questionText, // Include the question text
+                        type: 'option', // Indicate this is an option-based question
+                    });
+                } else if (question.querySelector('input[type="radio"]')) {
+                    // If an option-based question has no answer, mark as unanswered
+                    hasUnansweredQuestions = true;
+                }
+
+                // Collect and validate long-form answers
+                const textarea = question.querySelector('textarea');
+                if (textarea) {
+                    const answer = textarea.value;
+
+                    // Check if the long-form answer is not empty (ignoring whitespace)
+                    if (answer.trim() === '') {
+                        hasUnansweredQuestions = true; // Set flag to true if empty input
+                    } else {
+                        longAnswers.push({
+                            question_id: questionId,
+                            answer: answer,
+                            question_text: questionText, // Include the question text
+                            type: 'long', // Indicate this is a long-form question
+                        });
+                    }
+                }
+            });
+
+            // Show a single alert if any question was not filled out
+            if (hasUnansweredQuestions) {
+                alert('You did not fill out everything. Please complete all questions.');
+                formValid = false;
+            }
+
+            // If the form is not valid, prevent submission
+            if (!formValid) {
+                return; // Exit the function to prevent submission
+            }
+
+            // Combine both sets of answers (for submission)
+            const data = {
+                score: score,
+                long_answers: longAnswers,  // Send long answers with question text
+                state: 'pending',
+                note: '', // Include any note if needed
+            };
+
+            // Submit the data via POST request
+            try {
+                const response = await fetch('/submit-form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    alert('Submitted quiz data');
+                    // Redirect to the user page (or any other page you need)
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Error submitting quiz data');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Error submitting quiz data');
+            }
+
+            // Display the result if the form was valid
+            document.getElementById('score').textContent = score;
+            document.getElementById('result').style.display = 'block';
+        }
+
          // Load the quiz questions when the page is ready
          window.onload = loadQuiz;
          

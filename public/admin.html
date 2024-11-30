@@ -1,421 +1,527 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Admin Panel</title>
-      <style>
-        /* Basic styling for the body and the table */
-        body {
-           font-family: Arial, sans-serif;
-           background-color: #f4f7fc;
-           padding: 20px;
-           margin: 0;
-        }
-     
-        h1 {
-           text-align: center;
-           color: #333;
-        }
-     
-        table {
-           width: 100%;
-           border-collapse: collapse;
-           margin-top: 20px;
-           background-color: #fff;
-           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Panel</title>
+        <style>
+            /* Basic styling for the body and the table */
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f7fc;
+                padding: 20px;
+                margin: 0;
+            }
 
-        td {
-            vertical-align: middle; /* Vertically center the content */
-            text-align: center; /* Horizontally center the content */
-        }
+            h1 {
+                text-align: center;
+                color: #333;
+            }
 
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                background-color: #fff;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
 
-        th, td {
-           padding: 10px;
-           text-align: left;
-           border-bottom: 1px solid #ddd;
-        }
-     
-        th {
-            text-align: center; /* Horizontally center the content */
-            vertical-align: middle; /* Vertically center the content */
-           background-color: #f0f0f0;
-           cursor: pointer;
-           color: #444;
-        }
-     
-        th:hover {
-           background-color: #e9e9e9;
-        }
-     
-        td input[type="text"] {
-           width: 100%;
-           padding: 5px;
-           margin: 5px 0;
-           border: 1px solid #ccc;
-           border-radius: 4px;
-           box-sizing: border-box;
-        }
-     
-        td select {
-           width: 100%;
-           padding: 5px;
-           border: 1px solid #ccc;
-           border-radius: 4px;
-           box-sizing: border-box;
-        }
-     
-        button {
-           padding: 8px 15px;
-           background-color: #007bff;
-           color: white;
-           border: none;
-           border-radius: 4px;
-           cursor: pointer;
-           text-align: center;
-        }
-     
-        button:hover {
-           background-color: #0056b3;
-        }
-     
-        .actions-button {
-           text-align: center;
-           padding: 0;
-        }
-     
-        /* Modal styles */
-        .modal {
-           display: none; /* Hidden by default */
-           position: fixed;
-           z-index: 1; /* Sit on top */
-           left: 0;
-           top: 0;
-           width: 100%;
-           height: 100%;
-           background-color: rgba(0, 0, 0, 0.6); /* Black with opacity */
-           padding-top: 60px;
-           overflow-y: auto; /* Allows scrolling if content is too long */
-        }
-     
-        .modal-content {
-           background-color: #fff;
-           margin: 5% auto;
-           padding: 30px;
-           border-radius: 8px;
-           width: 90%;
-           max-width: 800px;
-           box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-           position: relative;
-           max-height: 80vh; /* Limit the height of the modal */
-           overflow-y: auto; /* Enable scroll inside the modal */
-        }
-     
-        .modal-content h2 {
-           color: #333;
-           font-size: 24px;
-           margin-bottom: 15px;
-        }
-     
-        .modal-content .question-answer {
-           margin-bottom: 20px;
-           padding: 15px;
-           background-color: #f9f9f9;
-           border-radius: 6px;
-           box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-     
-        .modal-content .question-answer strong {
-           color: #007bff;
-           font-size: 18px;
-        }
-     
-        .modal-content .question-answer p {
-           color: #555;
-           font-size: 16px;
-           line-height: 1.6;
-        }
-     
-        .modal-content .question-answer p,
-        .modal-content .question-answer strong {
-           word-wrap: break-word; /* Ensure long words wrap instead of overflowing */
-           white-space: pre-wrap; /* Ensures text formatting is preserved */
-           word-break: break-word; /* Break long words if necessary */
-        }
-     
-        .modal-content .question-answer pre {
-           background-color: #f4f4f4;
-           padding: 10px;
-           border-radius: 4px;
-           white-space: pre-wrap;
-           word-wrap: break-word;
-           font-size: 14px;
-        }
-     
-        /* Close button */
-        .close {
-           color: #aaa;
-           font-size: 30px;
-           font-weight: bold;
-           cursor: pointer;
-           position: absolute;
-           top: 15px;
-           right: 15px;
-        }
-     
-        .close:hover,
-        .close:focus {
-           color: black;
-           text-decoration: none;
-           cursor: pointer;
-        }
-     
-        /* Responsive Design for Mobile */
-        @media screen and (max-width: 600px) {
-           .modal-content {
-              width: 95%;
-              margin: 5% auto;
-              padding: 20px;
-           }
-     
-           .modal-content h2 {
-              font-size: 20px;
-           }
-     
-           .modal-content .question-answer {
-              padding: 10px;
-           }
-     
-           .modal-content .question-answer p {
-              font-size: 14px;
-           }
-        }
-     </style>
-     
-   </head>
-   <body>
-      <h1>Admin Panel</h1>
-      <!-- Username Filter Dropdown -->
-      <div>
-         <label for="usernameFilter">Filter by Username:</label>
-         <select id="usernameFilter">
-            <option value="">-- All Users --</option>
-            <!-- Options will be populated dynamically -->
-         </select>
-      </div>
-      <!-- Table to Display Data -->
-      <table id="formDataTable" border="1">
-         <thead>
-            <tr>
-               <th>ID</th>
-               <th>Score</th>
-               <th>Username</th>
-               <th>User ID</th>
-               <th>Roles</th>
-               <th>Questions and Answers</th>
-               <th>State</th>
-               <th>Note</th>
-               <th>Time</th>
-               <th>Actions</th>
-            </tr>
-         </thead>
-         <tbody>
-            <!-- Table rows will be inserted dynamically -->
-         </tbody>
-      </table>
+            td {
+                vertical-align: middle; /* Vertically center the content */
+                text-align: center; /* Horizontally center the content */
+            }
 
-      <!-- Modal for displaying questions and answers -->
-      <div id="questionsModal" class="modal">
-         <div class="modal-content">
-            <span id="closeModal" class="close">&times;</span>
-            <h2>Questions and Answers</h2>
-            <div id="modalQuestions"></div>
-         </div>
-      </div>
+            th,
+            td {
+                padding: 10px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
 
-<!-- Inside your script block -->
-<script>
-    // Close modal event listener
-    const closeModalButton = document.getElementById('closeModal');
-    const modal = document.getElementById('questionsModal');
- 
-    closeModalButton.addEventListener('click', () => {
-       modal.style.display = 'none'; // Close the modal when clicked
-    });
- 
-    window.addEventListener('click', (event) => {
-       if (event.target === modal) {
-          modal.style.display = 'none'; // Close modal when clicking outside
-       }
-    });
- 
-    // Update ticket function (add this function to handle the state and note update)
-    function updateTicket(ticketId, newState, newNote, user_id) {
-       // Perform validation for the note (check if it's empty)
-       if (!newNote.trim()) {
-          alert('Note cannot be empty!');
-          return; // Prevent further execution if the note is empty
-       }
- 
-       // Send the updated data to the server (this is a mock request, replace with actual endpoint)
-       fetch(`/admin/update-state-and-note`, {
-          method: 'POST',
-          headers: {
-             'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            row_id: ticketId,
-            state: newState,
-            note: newNote,
-            user_id_dc: user_id
-          }),
-       })
-       .then(response => response.json())
-       .then(updatedTicket => {
-          alert('Ticket updated successfully!');
-          // Here you can update the row with the new state and note (you may also want to reload data)
-       })
-       .catch(error => {
-          console.error('Error updating ticket:', error);
-          alert('Error updating ticket!');
-       });
-    }
- 
-    // Fetch the initial data to populate the table and filter
-    fetch('/admin/data')
-    .then(response => response.json())
-    .then(data => {
-    data.forEach((item, index) => {
-        console.log(`Item ${index + 1}:`, item);
-    });
-        
-       const tableBody = document.getElementById('formDataTable').getElementsByTagName('tbody')[0];
-       const usernameFilter = document.getElementById('usernameFilter');
-       let filteredData = [...data];  // Keep track of the filtered data
- 
-       // Populate the username filter dropdown
-       function populateUsernameFilter(data) {
-          const uniqueUsernames = [...new Set(data.map(row => row.username))];
-          uniqueUsernames.forEach(username => {
-             const option = document.createElement('option');
-             option.value = username;
-             option.textContent = username;
-             usernameFilter.appendChild(option);
-          });
-       }
- 
-       // Function to render the table with the fetched data
-       function renderTable(dataToRender) {
-          tableBody.innerHTML = ''; // Clear the table body
-          dataToRender.forEach(row => {
-             const newRow = tableBody.insertRow();
- 
-             // Add ID column
-             newRow.insertCell().textContent = row.id;
- 
-             // Add Score column
-             newRow.insertCell().textContent = row.score;
- 
-             // Add Username column
-             newRow.insertCell().textContent = row.username;
- 
-             // Add User ID column
-             newRow.insertCell().textContent = row.user_id;
- 
-             // Add Roles column
-             newRow.insertCell().textContent = row.roles;  // Join roles as a string
- 
-             // Add Questions and Answers column with button
-             const questionsCell = newRow.insertCell();
-             questionsCell.style.textAlign = 'center'; // Horizontally center the button
-             questionsCell.style.verticalAlign = 'middle'; // Vertically center the button.
- 
-             const questionsButton = document.createElement('button');
-             questionsButton.textContent = 'View Q&A';
-             questionsCell.appendChild(questionsButton);
- 
-             // Add event listener for the Q&A button to open modal
-             questionsButton.addEventListener('click', () => {
-                const modalQuestions = document.getElementById('modalQuestions');
-                modalQuestions.innerHTML = ''; // Clear any previous content
- 
-                let parsedData;
-                try {
-                   parsedData = JSON.parse(row.questions_answers); // Parse the JSON string
-                   if (Array.isArray(parsedData)) {
-                      parsedData.forEach(qa => {
-                         const questionDiv = document.createElement('div');
-                         questionDiv.classList.add('question-answer');
-                         questionDiv.innerHTML = `
-                            <strong>Q:</strong> ${qa.question_text}<br>
-                            <p><strong>A:</strong> ${qa.answer}</p>
-                         `;
-                         modalQuestions.appendChild(questionDiv);
-                      });
-                   }
-                } catch (error) {
-                   console.error("Error parsing JSON:", error);
+            th {
+                text-align: center; /* Horizontally center the content */
+                vertical-align: middle; /* Vertically center the content */
+                background-color: #f0f0f0;
+                cursor: pointer;
+                color: #444;
+            }
+
+            th:hover {
+                background-color: #e9e9e9;
+            }
+
+            td input[type="text"] {
+                width: 100%;
+                padding: 5px;
+                margin: 5px 0;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            td select {
+                width: 100%;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            button {
+                padding: 8px 15px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                text-align: center;
+            }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+            .actions-button {
+                text-align: center;
+                padding: 0;
+            }
+
+            /* Modal styles */
+            .modal {
+                display: none; /* Hidden by default */
+                position: fixed;
+                z-index: 1; /* Sit on top */
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.6); /* Black with opacity */
+                padding-top: 60px;
+                overflow-y: auto; /* Allows scrolling if content is too long */
+            }
+
+            .modal-content {
+                background-color: #fff;
+                margin: 5% auto;
+                padding: 30px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 800px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                position: relative;
+                max-height: 80vh; /* Limit the height of the modal */
+                overflow-y: auto; /* Enable scroll inside the modal */
+            }
+
+            .modal-content h2 {
+                color: #333;
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+
+            .modal-content .question-answer {
+                margin-bottom: 20px;
+                padding: 15px;
+                background-color: #f9f9f9;
+                border-radius: 6px;
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .modal-content .question-answer strong {
+                color: #007bff;
+                font-size: 18px;
+            }
+
+            .modal-content .question-answer p {
+                color: #555;
+                font-size: 16px;
+                line-height: 1.6;
+            }
+
+            .modal-content .question-answer p,
+            .modal-content .question-answer strong {
+                word-wrap: break-word; /* Ensure long words wrap instead of overflowing */
+                white-space: pre-wrap; /* Ensures text formatting is preserved */
+                word-break: break-word; /* Break long words if necessary */
+            }
+
+            .modal-content .question-answer pre {
+                background-color: #f4f4f4;
+                padding: 10px;
+                border-radius: 4px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-size: 14px;
+            }
+
+            /* Close button */
+            .close {
+                color: #aaa;
+                font-size: 30px;
+                font-weight: bold;
+                cursor: pointer;
+                position: absolute;
+                top: 15px;
+                right: 15px;
+            }
+
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            /* Responsive Design for Mobile */
+            @media screen and (max-width: 600px) {
+                .modal-content {
+                    width: 95%;
+                    margin: 5% auto;
+                    padding: 20px;
                 }
- 
-                modal.style.display = 'block';  // Show the modal
-             });
- 
-             // Add State column with dropdown for changing state
-             const stateCell = newRow.insertCell();
-             const stateSelect = document.createElement('select');
-             const states = ['pending', 'approved', 'rejected'];  // Define available states
-             states.forEach(state => {
-                const option = document.createElement('option');
-                option.value = state;
-                option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
-                if (row.state === state) {
-                   option.selected = true;  // Set the current state as selected
-                }
-                stateSelect.appendChild(option);
-             });
-             stateCell.appendChild(stateSelect);
- 
-             // Add the editable Note field
-             const noteCell = newRow.insertCell();
-             const noteInput = document.createElement('input');
-             noteInput.type = 'text';
-             noteInput.value = row.note || ''; // Set the current note (empty if no note)
-             noteCell.appendChild(noteInput);
- 
-             // Add the Time column
-             newRow.insertCell().textContent = new Date(row.time).toLocaleString();
- 
-             // Add a button to update the state and note
-             const updateButtonCell = newRow.insertCell();
-             const updateButton = document.createElement('button');
-             updateButton.textContent = 'Update';
-             updateButton.addEventListener('click', () => {
-                const newState = stateSelect.value;
-                const newNote = noteInput.value;
-                // Call your update function to save changes to the server
-                updateTicket(row.id, newState, newNote,row.user_id);
-             });
-             updateButtonCell.appendChild(updateButton);
-          });
-       }
- 
-       // Populate filter options and render the table
-       populateUsernameFilter(data);
-       renderTable(data);
- 
-       // Handle filtering by username
-       usernameFilter.addEventListener('change', () => {
-          const filtered = data.filter(row => {
-             return row.username === usernameFilter.value || usernameFilter.value === '';
-          });
-          renderTable(filtered);
-       });
-    })
-    .catch(error => console.error('Error fetching data:', error));
- </script>
- 
 
-   </body>
+                .modal-content h2 {
+                    font-size: 20px;
+                }
+
+                .modal-content .question-answer {
+                    padding: 10px;
+                }
+
+                .modal-content .question-answer p {
+                    font-size: 14px;
+                }
+            }
+
+            .delete-button {
+               background-color: red;
+               color: white;
+               border: none;
+               padding: 5px 10px;
+               cursor: pointer;
+               border-radius: 3px;
+            }
+
+            .delete-button:hover {
+               background-color: darkred;
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>Admin Panel</h1>
+        <!-- Username Filter Dropdown -->
+        <div>
+            <label for="usernameFilter">Filter by Username:</label>
+            <select id="usernameFilter">
+                <option value="">-- All Users --</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+        </div>
+        <!-- Table to Display Data -->
+        <table id="formDataTable" border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Score</th>
+                    <th>Username</th>
+                    <th>User ID</th>
+                    <th>Roles</th>
+                    <th>Questions and Answers</th>
+                    <th>State</th>
+                    <th>Note</th>
+                    <th>Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will be inserted dynamically -->
+            </tbody>
+        </table>
+
+        <!-- Modal for displaying questions and answers -->
+        <div id="questionsModal" class="modal">
+            <div class="modal-content">
+                <span id="closeModal" class="close">&times;</span>
+                <h2>Questions and Answers</h2>
+                <div id="modalQuestions"></div>
+            </div>
+        </div>
+
+        <!-- Inside your script block -->
+        <script>
+            // Close modal event listener
+            const closeModalButton = document.getElementById("closeModal");
+            const modal = document.getElementById("questionsModal");
+
+            closeModalButton.addEventListener("click", () => {
+                modal.style.display = "none"; // Close the modal when clicked
+            });
+
+            window.addEventListener("click", (event) => {
+                if (event.target === modal) {
+                    modal.style.display = "none"; // Close modal when clicking outside
+                }
+            });
+
+            
+
+            function showDeleteConfirmation(ticketId) {
+                  const confirmationModal = document.createElement('div');
+                  confirmationModal.style.position = 'fixed';
+                  confirmationModal.style.top = '50%';
+                  confirmationModal.style.left = '50%';
+                  confirmationModal.style.transform = 'translate(-50%, -50%)';
+                  confirmationModal.style.backgroundColor = '#fff';
+                  confirmationModal.style.padding = '20px';
+                  confirmationModal.style.boxShadow = '0px 0px 10px rgba(0, 0, 0, 0.1)';
+                  confirmationModal.style.borderRadius = '8px';
+                  confirmationModal.style.zIndex = '1000';
+
+                  confirmationModal.innerHTML = `
+                     <h3>Are you sure you want to delete this ticket?</h3>
+                     <button id="confirmDelete" style="background-color: red; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Yes</button>
+                     <button id="cancelDelete" style="background-color: gray; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">No</button>
+                  `;
+
+                  document.body.appendChild(confirmationModal);
+
+                  document.getElementById('confirmDelete').addEventListener('click', () => {
+                     deleteTicket(ticketId);
+                     confirmationModal.remove();
+                     refreshTable();
+                  });
+
+                  document.getElementById('cancelDelete').addEventListener('click', () => {
+                     confirmationModal.remove();
+                  });
+               }
+
+            function showUpdateNotification(text, color) {
+                  const notification = document.createElement('div');
+                  notification.style.position = 'fixed';
+                  notification.style.bottom = '20px';
+                  notification.style.left = '50%';
+                  notification.style.transform = 'translateX(-50%)';
+                  notification.style.backgroundColor = color;
+                  notification.style.color = '#fff';
+                  notification.style.padding = '10px 20px';
+                  notification.style.borderRadius = '4px';
+                  notification.style.boxShadow = '0px 0px 5px rgba(0, 0, 0, 0.2)';
+                  notification.style.zIndex = '1000';
+                  notification.style.display = 'inline-block';
+                  notification.textContent = text;
+
+                  document.body.appendChild(notification);
+
+                  setTimeout(() => {
+                     notification.style.transition = 'opacity 0.5s';
+                     notification.style.opacity = '0';
+                     setTimeout(() => notification.remove(), 500);
+                  }, 2000);
+               }
+
+            function renderTable(dataToRender) {
+                        const tableBody = document.getElementById("formDataTable").getElementsByTagName("tbody")[0];
+                        tableBody.innerHTML = ""; // Clear the table body
+
+                        dataToRender.forEach((row) => {
+                              const newRow = tableBody.insertRow();
+
+                              // Add ID column
+                              newRow.insertCell().textContent = row.id;
+
+                              // Add Score column
+                              newRow.insertCell().textContent = row.score;
+
+                              // Add Username column
+                              newRow.insertCell().textContent = row.username;
+
+                              // Add User ID column
+                              newRow.insertCell().textContent = row.user_id;
+
+                              // Add Roles column
+                              newRow.insertCell().textContent = row.roles; // Join roles as a string
+
+                              // Add Questions and Answers column with button
+                              const questionsCell = newRow.insertCell();
+                              questionsCell.style.textAlign = "center"; // Horizontally center the button
+                              questionsCell.style.verticalAlign = "middle"; // Vertically center the button.
+
+                              const questionsButton = document.createElement("button");
+                              questionsButton.textContent = "View Q&A";
+                              questionsCell.appendChild(questionsButton);
+
+                              // Add event listener for the Q&A button to open modal
+                              questionsButton.addEventListener("click", () => {
+                                 const modalQuestions = document.getElementById("modalQuestions");
+                                 modalQuestions.innerHTML = ""; // Clear any previous content
+
+                                 let parsedData;
+                                 try {
+                                    parsedData = JSON.parse(row.questions_answers); // Parse the JSON string
+                                    if (Array.isArray(parsedData)) {
+                                          parsedData.forEach((qa) => {
+                                             const questionDiv = document.createElement("div");
+                                             questionDiv.classList.add("question-answer");
+                                             questionDiv.innerHTML = `
+                              <strong>Q:</strong> ${qa.question_text}<br>
+                              <p><strong>A:</strong> ${qa.answer}</p>
+                           `;
+                                             modalQuestions.appendChild(questionDiv);
+                                          });
+                                    }
+                                 } catch (error) {
+                                    console.error("Error parsing JSON:", error);
+                                 }
+
+                                 modal.style.display = "block"; // Show the modal
+                              });
+
+                              // Add State column with dropdown for changing state
+                              const stateCell = newRow.insertCell();
+                              const stateSelect = document.createElement("select");
+                              const states = ["pending", "approved", "rejected"]; // Define available states
+                              states.forEach((state) => {
+                                 const option = document.createElement("option");
+                                 option.value = state;
+                                 option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+                                 if (row.state === state) {
+                                    option.selected = true; // Set the current state as selected
+                                 }
+                                 stateSelect.appendChild(option);
+                              });
+                              stateCell.appendChild(stateSelect);
+
+                              // Add the editable Note field
+                              const noteCell = newRow.insertCell();
+                              const noteInput = document.createElement("input");
+                              noteInput.type = "text";
+                              noteInput.value = row.note || ""; // Set the current note (empty if no note)
+                              noteCell.appendChild(noteInput);
+
+                              // Add the Time column
+                              newRow.insertCell().textContent = new Date(row.time).toLocaleString();
+
+                              // Add a button to update the state and note
+                              const updateButtonCell = newRow.insertCell();
+                              const updateButton = document.createElement("button");
+                              updateButton.textContent = "Update";
+
+                              const deleteButton = document.createElement("button");
+                              deleteButton.textContent = "Delete";
+                              deleteButton.classList.add("delete-button"); // Add a CSS class for styling
+
+                              updateButton.addEventListener("click", () => {
+                                 const newState = stateSelect.value;
+                                 const newNote = noteInput.value;
+                                 updateTicket(row.id, newState, newNote, row.user_id);
+                              });
+
+                              deleteButton.addEventListener("click", () => {
+                                 showDeleteConfirmation(row.id);
+                              });
+
+                              updateButtonCell.appendChild(updateButton);
+                              updateButtonCell.appendChild(deleteButton);
+                        });
+                     }
+
+            function deleteTicket(ticketId) {
+                if (!ticketId) {
+                    return;
+                }
+
+                fetch(`/admin/delete_ticket`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        row_id: ticketId,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .catch((error) => {
+                        console.error("Error deleting ticket:", error);
+                        alert("Error deleting ticket!");
+                    });
+            }
+
+            function updateTicket(ticketId, newState, newNote, user_id) {
+                if (!newNote.trim()) {
+                  showUpdateNotification("Note cannot be empty!","red");
+                    return;
+                }
+
+                fetch(`/admin/update-state-and-note`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        row_id: ticketId,
+                        state: newState,
+                        note: newNote,
+                        user_id_dc: user_id,
+                    }),
+                })
+                    .then((response) => {
+                        response.json();
+                        showUpdateNotification("Ticket updated successfully!","green");
+                    })
+                    .catch((error) => {
+                        console.error("Error updating ticket:", error);
+                        showUpdateNotification("Failed to update the ticket. Please try again","red");
+                    });
+            }
+
+               function refreshTable() {
+                  fetch("/admin/data")
+                  .then((response) => response.json())
+                  .then((data) => {
+                     populateUsernameFilter(data);
+                     renderTable(data); // Call the same renderTable function
+                  })
+                  .catch((error) => console.error("Error fetching data:", error));
+               }
+
+            // Update the populateUsernameFilter function to only add unique usernames dynamically
+            function populateUsernameFilter(data) {
+                  const usernameFilter = document.getElementById("usernameFilter");
+                  usernameFilter.innerHTML = ''; // Clear the existing options
+
+                  const uniqueUsernames = [...new Set(data.map((row) => row.username))];
+                  uniqueUsernames.forEach((username) => {
+                     const option = document.createElement("option");
+                     option.value = username;
+                     option.textContent = username;
+                     usernameFilter.appendChild(option);
+                  });
+            }
+
+            // Fetch the initial data to populate the table and filter
+            fetch("/admin/data")
+                .then((response) => response.json())
+                .then((data) => {
+                    const tableBody = document.getElementById("formDataTable").getElementsByTagName("tbody")[0];
+                    const usernameFilter = document.getElementById("usernameFilter");
+                    let filteredData = [...data]; // Keep track of the filtered data
+
+                    populateUsernameFilter(data);
+                    renderTable(data);
+
+                    // Handle filtering by username
+                    usernameFilter.addEventListener("change", () => {
+                        const filtered = data.filter((row) => {
+                            return row.username === usernameFilter.value || usernameFilter.value === "";
+                        });
+                        renderTable(filtered);
+                    });
+                })
+                .catch((error) => console.error("Error fetching data:", error));
+
+
+        </script>
+    </body>
 </html>

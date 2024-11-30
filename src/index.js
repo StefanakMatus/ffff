@@ -167,13 +167,10 @@ app.get('/admin', (req, res) => {
         return res.redirect('/login');  // Redirect to login if not authenticated
     }
 
-    console.log("DB??:" + db);
     db.connect((err) => {
         if (err) {
             console.error('Database connection error:', err);
             process.exit(1);  // Exit if connection fails
-        } else {
-            console.log('Connected to MySQL database');
         }
     });
 
@@ -192,13 +189,10 @@ app.get('/user', (req, res) => {
         return res.redirect('/login');  // Redirect to login if not authenticated
     }
 
-    console.log("DB??:" + db);
     db.connect((err) => {
         if (err) {
             console.error('Database connection error:', err);
             process.exit(1);  // Exit if connection fails
-        } else {
-            console.log('Connected to MySQL database');
         }
     });
 
@@ -211,6 +205,13 @@ app.get('/user', (req, res) => {
     return res.sendFile(path.join(__dirname, '..', 'public', 'user.html'));
 });
 
+
+
+
+    
+
+
+
 app.post('/submit-form', async (req, res) => {
     if (!req.isAuthenticated()) {
         return res.redirect('/login');
@@ -218,21 +219,6 @@ app.post('/submit-form', async (req, res) => {
 
     const { score, long_answers, state, note } = req.body;
     const user = req.user;
-
-
-
-    // Ensure roles are provided, either from user or from the form
-
-    console.log("I got score: " + score);
-    console.log("Long Answers Breakdown:");
-    long_answers.forEach((item, index) => {
-        console.log(`Question ${index + 1}: ${item.question_text}`);
-        console.log(`Answer ${index + 1}: ${item.answer}`);
-        console.log('---'); // Separator for better readability
-    });
-        console.log("Roles:" + user.roles.join(','))
-    console.log("User id: " + user.id);
-    console.log("username: " + user.username);
 
     const query = `
     INSERT INTO form_submissions 
@@ -257,8 +243,6 @@ app.post('/submit-form', async (req, res) => {
             console.error('Error inserting form data:', error);
             return res.status(500).send('Error saving form data');
         }
-
-        console.log('Form data inserted into database');
         return res.redirect('/user'); // Redirect after successful form submission
     });
 
@@ -289,10 +273,47 @@ app.get('/admin/data', (req, res) => {
             return res.status(500).send('Error fetching form data');
         }
 
-        console.log('Fetched data:', results);
 
         // Send the form data as JSON
         res.json(results);
+    });
+});
+
+
+
+app.post('/admin/delete_ticket', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/login');
+    }
+
+    // Ensure the user has the correct role (e.g., 'god')
+    if (!Array.isArray(req.user.roles) || !req.user.roles.map(role => role.toLowerCase()).includes('god')) {
+        return res.status(403).send('<h1>Access Denied</h1><p>You do not have permission to delete the ticket</p>');
+    }
+
+    const { row_id } = req.body;
+
+    // Validate row_id
+    if (!row_id || isNaN(row_id)) {
+        return res.status(400).send('Invalid ticket ID');
+    }
+
+    const query = 'DELETE FROM form_submissions WHERE id = ?';
+    const values = [row_id];
+
+    // Perform the database query
+    db.query(query, values, (error, results) => {
+        if (error) {
+            console.error('Error deleting ticket:', error);
+            return res.status(500).send('Error deleting ticket');
+        }
+
+        if (results.affectedRows === 0) {
+            return res.status(404).send('Ticket not found');
+        }
+
+        // Send a success response
+        res.json({ message: 'Ticket deleted successfully', row_id });
     });
 });
 
@@ -303,23 +324,12 @@ app.post('/admin/update-state-and-note', (req, res) => {
         return res.redirect('/login');
     }
 
-
-    console.log("Do i evne got here?");
     // Ensure the user has the correct role (e.g., 'god')
     if (!req.user.roles || !req.user.roles.includes('god')) {
         return res.status(403).send('<h1>Access Denied</h1><p>You do not have permission to update the state or note.</p>');
     }
 
     const { row_id, state, note,user_id_dc } = req.body;
-
-
-    /*
-    console.log("row id: " + row_id);
-    console.log("state: " + state);
-    console.log("rnote: " + note);
-    console.log("user_id_dc: " + user_id_dc);
-    console.log(typeof user_id_dc);
-    */
 
     // Ensure that required fields are provided
     if (!row_id || !state || !note || !user_id_dc) {
@@ -410,6 +420,9 @@ app.get('/user/questions', (req, res) => {
         res.json(results);
     });
 });
+
+
+
 
 app.get('/user/question_long', (req, res) => {
     if (!req.isAuthenticated()) {

@@ -63,14 +63,17 @@ app.use(express.json());
 // Middleware
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Replace with a secure key
+    secret: process.env.SESSION_SECRET, // Use a secure session secret
     resave: false,
     saveUninitialized: true,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',  // Cookies should be secure in production (HTTPS)
-        httpOnly: true,  // Prevent access to the cookie from JavaScript
-        sameSite: 'strict', // Adjust this if necessary based on your setup
-    }}));
+        // Only use `secure: true` in production when the app is served over HTTPS
+        secure: process.env.NODE_ENV === 'production',  // true if production, false if development
+        httpOnly: true,  // Prevents JavaScript from accessing cookies
+        sameSite: 'strict', // Helps to prevent CSRF attacks
+    }
+}));
+
 
 app.use(passport.initialize());
 app.use(passport.session());

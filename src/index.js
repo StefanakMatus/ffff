@@ -141,7 +141,8 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
-    console.log("/dashboard route");
+    console.log("/dashboard route req: " + JSON.stringify(req.body, null, 2));
+    console.log("test: " + req.isAuthenticated());
     if (!req.isAuthenticated()) {
         console.log("dashboard failed going back to default?");
         return res.redirect("/default"); // Redirect to login if not authenticated

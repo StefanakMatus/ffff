@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Client, GatewayIntentBits } from "discord.js";
+import compression from 'compression';
+
 
 // Derive __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -61,8 +63,8 @@ passport.use(
 
 app.use(express.static("public")); // Or any directory where your HTML files are stored
 app.use(express.json());
-const compression = require('compression');
 app.use(compression());
+
 
 // Middleware
 app.use(

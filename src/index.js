@@ -145,6 +145,7 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
+    console.log("Data in /dashboard: " + req.body);
     console.log("/dashboard route");
     if (!req.isAuthenticated()) {
         return res.redirect("/default"); // Redirect to login if not authenticated
@@ -331,6 +332,9 @@ app.post("/admin/update-state-and-note", (req, res) => {
 });
 
 app.get("/default",(req, res) => {
+    if (req.isAuthenticated()) {
+        return res.redirect("/dashboard");
+    }
     console.log("default route");
     // Serve the user HTML file
     return res.sendFile(path.join(__dirname, "..", "public", "default.html"));

@@ -1,58 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Dashboard</title>
-        <style>
-           
-        </style>
-    </head>
-    <body>
-        <nav>
-            <ul>
-                <li><a href="/dashboard">Home</a></li>
-            </ul>
-        </nav>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body setup with background image */
+        body {
+            font-family: Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 40px;
+            overflow: hidden; /* Prevent scrolling caused by background */
+            background-image: url('https://wallpaper.dog/large/20488880.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Wrapper to center the page content */
+        .wrapper {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: transparent;
+            padding: 15px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            box-shadow: none;
+        }
+
+        /* Logo and server name on the left */
+        #logo {
+            font-size: 28px; /* Increased font size */
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Navigation menu */
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        /* Make the list items have a transparent grey background */
+        nav ul li {
+            margin: 0 15px;
+            position: relative;
+            background-color: rgba(128, 128, 128, 0.3); /* Transparent grey */
+            border-radius: 5px;
+        }
+
+        /* Make the text inside the list items bigger */
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 20px; /* Increased font size */
+            padding: 15px 20px; /* Added padding for bigger clickable area */
+            display: block;
+            border-radius: 5px;
+            transition: none; /* Remove hover transition effect */
+        }
+
+        /* Hover effect for the parent li */
+        nav ul li:hover {
+            background-color: rgba(128, 128, 128, 0.5); /* Slightly darker background for parent li */
+        }
+
+        /* Hover effect for the a tag only, when hovering over the a */
+        nav ul li a:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        /* Dropdown specific styling */
+        nav ul li ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.7); /* Darker background */
+            list-style: none;
+            padding: 0px 0;
+            border-radius: 8px; /* More rounded corners */
+            width: 150px; /* Slightly wider */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* More pronounced shadow */
+            opacity: 0; /* Start hidden for better transition */
+            visibility: hidden; /* Ensure it's not interactive before hover */
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+
+        /* Show the submenu when hovering over the parent li */
+        nav ul li:hover > ul {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s 0s;
+        }
+
+        /* Style the individual submenu items */
+        nav ul li ul li {
+            padding: 12px 20px;
+            width: 100%;
+        }
+
+        /* Main content */
+        main {
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        /* Section style for admin, user, and error */
+        .section {
+            display: none;
+            background-color: transparent;
+        }
+
+        .section h1 {
+            font-size: 32px; /* Increased font size */
+            margin-bottom: 20px;
+        }
+
+        .section p {
+            font-size: 20px; /* Increased font size */
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+            }
+
+            nav ul li {
+                margin: 10px 0;
+            }
+
+            nav ul li ul {
+                width: 100%;
+            }
+
+            #logo {
+                font-size: 24px; /* Increased logo font size */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <div id="logo" onclick="window.location.href='/dashboard'">ServerName</div>
+            <nav>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Rules</a></li>
+                    <li><a href="#">Forum</a></li>
+                    <li><a href="/profile">Profile</a>
+                        <ul>
+                            <a href="#">Tickets</a>
+                            <a href="/user" id="whiteListSection" class="section">Whitelist</a>
+                            <a href="/admin" id="adminSection" class="section">Admin View</a>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
         <main>
-            <div id="adminSection" style="display: none;">
-                <h1>Admin Dashboard</h1>
-                <p>Welcome to the admin panel.</p>
-                <a href="/admin">Admin</a>
-                <!-- Admin-specific content here -->
-            </div>
-            <div id="userSection" style="display: none;">
-                <h1>User Dashboard</h1>
-                <p>Welcome to your dashboard!</p>
-                <!-- User-specific content here -->
-                <a href="/user">user</a>
-            </div>
-            <div id="errorSection" style="display: none;">
-                <h1>Access Denied</h1>
-                <p>You do not have permission to access this content.</p>
+            <div id="errorSection" class="section">
+                <h1>You don't have any roles on the Discord server. Please contact the Administrators.</h1>
             </div>
         </main>
-        <script>
-            // Fetch dashboard data from the server
-            fetch("/dashboard-data")
-                .then((res) => res.json())
-                .then((data) => {
-                    if (!data.roles || data.roles.length === 0) {
-                        document.getElementById("errorSection").style.display = "block";
-                        return;
-                    }
-                    // Show sections based on roles
-                    if (data.roles.includes("god")) {
-                        document.getElementById("adminSection").style.display = "block";
-                    }
-                    if (data.roles.includes("testingBot")) {
-                        document.getElementById("userSection").style.display = "block";
-                    }
-                })
-                .catch((err) => {
-                    console.error("Error fetching dashboard data:", err);
+    </div>
+
+    <script>
+        // Fetch dashboard data from the server
+        fetch("/dashboard-data")
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.roles || data.roles.length === 0) {
                     document.getElementById("errorSection").style.display = "block";
-                });
-        </script>
-    </body>
+                    return;
+                }
+
+                if(data.notWhiteListed){
+                    document.getElementById("whiteListSection").style.display = "block";
+                }
+                // Show sections based on roles
+                if (data.isAdmin) {
+                    document.getElementById("adminSection").style.display = "block";
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching dashboard data:", err);
+                document.getElementById("errorSection").style.display = "block";
+            });
+    </script>
+</body>
 </html>

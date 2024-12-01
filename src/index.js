@@ -56,6 +56,8 @@ passport.use(
 );
 
 app.use(express.static("public")); // Or any directory where your HTML files are stored
+// Serve static files from the 'src' folder (for media files like videos)
+
 app.use(express.json());
 
 // Middleware
@@ -100,7 +102,6 @@ app.use(async (req, res, next) => {
 
 
 
-
 // Login Route (Check if already authenticated)
 app.get("/login", (req, res, next) => {
     if (req.isAuthenticated()) {
@@ -113,7 +114,7 @@ app.get("/login", (req, res, next) => {
 app.get(
     "/callback",
     passport.authenticate("discord", {
-        failureRedirect: "/login", // Redirect to /login if authentication fails
+        failureRedirect: "/default", // Redirect to /login if authentication fails
     }),
     (req, res) => {
         res.redirect("/dashboard"); // Redirect to dashboard after successful login
@@ -123,7 +124,7 @@ app.get(
 // Dashboard Route (protected)
 app.get("/dashboard-data", async (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     // Assuming roles have been attached to req.user in the middleware
@@ -136,6 +137,7 @@ app.get("/dashboard-data", async (req, res) => {
         roles: roleNames,
         isAdmin: roleNames.includes("god"),
         isUser: roleNames.includes("testingBot"),
+        notWhiteListed: roleNames.includes("not")
     };
 
     // Send the data as JSON
@@ -145,14 +147,14 @@ app.get("/dashboard-data", async (req, res) => {
 
 app.get("/dashboard", async (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
     return res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"));
 });
 
 app.get("/admin", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     // Ensure the user is an admin
@@ -166,7 +168,7 @@ app.get("/admin", (req, res) => {
 
 app.get("/user", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     // Ensure the user has the 'testingBot' role
@@ -180,7 +182,7 @@ app.get("/user", (req, res) => {
 
 app.post("/submit-form", async (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login");
+        return res.redirect("/default");
     }
 
     const { score, long_answers, state, note } = req.body;
@@ -219,7 +221,7 @@ app.post("/submit-form", async (req, res) => {
 
 app.get("/admin/data", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     // Ensure the user is an admin
@@ -243,7 +245,7 @@ app.get("/admin/data", (req, res) => {
 
 app.post("/admin/delete_ticket", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login");
+        return res.redirect("/default");
     }
 
     // Ensure the user has the correct role (e.g., 'god')
@@ -279,7 +281,7 @@ app.post("/admin/delete_ticket", (req, res) => {
 
 app.post("/admin/update-state-and-note", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login");
+        return res.redirect("/default");
     }
 
     // Ensure the user has the correct role (e.g., 'god')
@@ -328,18 +330,23 @@ app.post("/admin/update-state-and-note", (req, res) => {
     });
 });
 
+app.get("/default",(req, res) => {
+    // Serve the user HTML file
+    return res.sendFile(path.join(__dirname, "..", "public", "default.html"));
+});
+
 // Default route - automatically redirects to /dashboard if logged in
 app.get("/", (req, res) => {
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard"); // If logged in, redirect to dashboard
     } else {
-        return res.redirect("/login"); // If not logged in, redirect to login
+        return res.redirect("/default"); // If not logged in, redirect to login
     }
 });
 
 app.post("/user/get-correct-answers", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     const questionIds = req.body.questionIds;
@@ -367,7 +374,7 @@ app.post("/user/get-correct-answers", (req, res) => {
 
 app.get("/user/questions", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     // Assuming you store previously selected question IDs in an array
@@ -404,7 +411,7 @@ app.get("/user/questions", (req, res) => {
 
 app.get("/user/question_long", (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect("/login"); // Redirect to login if not authenticated
+        return res.redirect("/default"); // Redirect to login if not authenticated
     }
 
     // Assuming you store previously selected question IDs in an array

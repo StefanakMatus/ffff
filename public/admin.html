@@ -293,7 +293,6 @@
                 document.getElementById("confirmDelete").addEventListener("click", () => {
                     deleteTicket(ticketId);
                     confirmationModal.remove();
-                    refreshTable();
                 });
 
                 document.getElementById("cancelDelete").addEventListener("click", () => {
@@ -330,7 +329,9 @@
                 tableBody.innerHTML = ""; // Clear the table body
 
                     // Ensure dataToRender is an array
+                    console.log(dataToRender.length);
                 if (!Array.isArray(dataToRender)) {
+                    console.log("Emprt array?");
                     dataToRender = [];
                 }
 
@@ -458,8 +459,8 @@
                         }
                     })
                     .then((data) => {
+                        refreshTable();
                         // Update the table with the new data from the server response
-                        renderTable(data);
                         showUpdateNotification("Ticket deleted successfully!", "green");
                     })
                     .catch((error) => {

@@ -111,10 +111,9 @@ app.get("/login", (req, res, next) => {
 });
 
 // Callback route after Discord login
-app.get(
-    "/callback",
+app.get("/callback",
     passport.authenticate("discord", {
-        failureRedirect: "/default", // Redirect to /login if authentication fails
+        failureRedirect: "/dashboard", // Redirect to /login if authentication fails
     }),
     (req, res) => {
         res.redirect("/dashboard"); // Redirect to dashboard after successful login

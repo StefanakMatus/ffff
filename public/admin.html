@@ -5,6 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Admin Panel</title>
         <style>
+
+            
             /* Basic styling for the body and the table */
             body {
                 font-family: Arial, sans-serif;
@@ -194,22 +196,26 @@
             }
 
             .delete-button {
-               background-color: red;
-               color: white;
-               border: none;
-               padding: 5px 10px;
-               cursor: pointer;
-               border-radius: 3px;
+                background-color: red;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                cursor: pointer;
+                border-radius: 3px;
             }
 
             .delete-button:hover {
-               background-color: darkred;
+                background-color: darkred;
             }
-
         </style>
     </head>
     <body>
         <h1>Admin Panel</h1>
+        <nav>
+            <ul>
+                <li><a href="/dashboard">Home</a></li>
+            </ul>
+        </nav>
         <!-- Username Filter Dropdown -->
         <div>
             <label for="usernameFilter">Filter by Username:</label>
@@ -264,168 +270,171 @@
                 }
             });
 
-            
-
             function showDeleteConfirmation(ticketId) {
-                  const confirmationModal = document.createElement('div');
-                  confirmationModal.style.position = 'fixed';
-                  confirmationModal.style.top = '50%';
-                  confirmationModal.style.left = '50%';
-                  confirmationModal.style.transform = 'translate(-50%, -50%)';
-                  confirmationModal.style.backgroundColor = '#fff';
-                  confirmationModal.style.padding = '20px';
-                  confirmationModal.style.boxShadow = '0px 0px 10px rgba(0, 0, 0, 0.1)';
-                  confirmationModal.style.borderRadius = '8px';
-                  confirmationModal.style.zIndex = '1000';
+                const confirmationModal = document.createElement("div");
+                confirmationModal.style.position = "fixed";
+                confirmationModal.style.top = "50%";
+                confirmationModal.style.left = "50%";
+                confirmationModal.style.transform = "translate(-50%, -50%)";
+                confirmationModal.style.backgroundColor = "#fff";
+                confirmationModal.style.padding = "20px";
+                confirmationModal.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.1)";
+                confirmationModal.style.borderRadius = "8px";
+                confirmationModal.style.zIndex = "1000";
 
-                  confirmationModal.innerHTML = `
+                confirmationModal.innerHTML = `
                      <h3>Are you sure you want to delete this ticket?</h3>
                      <button id="confirmDelete" style="background-color: red; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Yes</button>
                      <button id="cancelDelete" style="background-color: gray; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">No</button>
                   `;
 
-                  document.body.appendChild(confirmationModal);
+                document.body.appendChild(confirmationModal);
 
-                  document.getElementById('confirmDelete').addEventListener('click', () => {
-                     deleteTicket(ticketId);
-                     confirmationModal.remove();
-                     refreshTable();
-                  });
+                document.getElementById("confirmDelete").addEventListener("click", () => {
+                    deleteTicket(ticketId);
+                    confirmationModal.remove();
+                    refreshTable();
+                });
 
-                  document.getElementById('cancelDelete').addEventListener('click', () => {
-                     confirmationModal.remove();
-                  });
-               }
+                document.getElementById("cancelDelete").addEventListener("click", () => {
+                    confirmationModal.remove();
+                });
+            }
 
             function showUpdateNotification(text, color) {
-                  const notification = document.createElement('div');
-                  notification.style.position = 'fixed';
-                  notification.style.bottom = '20px';
-                  notification.style.left = '50%';
-                  notification.style.transform = 'translateX(-50%)';
-                  notification.style.backgroundColor = color;
-                  notification.style.color = '#fff';
-                  notification.style.padding = '10px 20px';
-                  notification.style.borderRadius = '4px';
-                  notification.style.boxShadow = '0px 0px 5px rgba(0, 0, 0, 0.2)';
-                  notification.style.zIndex = '1000';
-                  notification.style.display = 'inline-block';
-                  notification.textContent = text;
+                const notification = document.createElement("div");
+                notification.style.position = "fixed";
+                notification.style.bottom = "20px";
+                notification.style.left = "50%";
+                notification.style.transform = "translateX(-50%)";
+                notification.style.backgroundColor = color;
+                notification.style.color = "#fff";
+                notification.style.padding = "10px 20px";
+                notification.style.borderRadius = "4px";
+                notification.style.boxShadow = "0px 0px 5px rgba(0, 0, 0, 0.2)";
+                notification.style.zIndex = "1000";
+                notification.style.display = "inline-block";
+                notification.textContent = text;
 
-                  document.body.appendChild(notification);
+                document.body.appendChild(notification);
 
-                  setTimeout(() => {
-                     notification.style.transition = 'opacity 0.5s';
-                     notification.style.opacity = '0';
-                     setTimeout(() => notification.remove(), 500);
-                  }, 2000);
-               }
+                setTimeout(() => {
+                    notification.style.transition = "opacity 0.5s";
+                    notification.style.opacity = "0";
+                    setTimeout(() => notification.remove(), 500);
+                }, 2000);
+            }
 
             function renderTable(dataToRender) {
-                        const tableBody = document.getElementById("formDataTable").getElementsByTagName("tbody")[0];
-                        tableBody.innerHTML = ""; // Clear the table body
+                const tableBody = document.getElementById("formDataTable").getElementsByTagName("tbody")[0];
+                tableBody.innerHTML = ""; // Clear the table body
 
-                        dataToRender.forEach((row) => {
-                              const newRow = tableBody.insertRow();
+                    // Ensure dataToRender is an array
+                if (!Array.isArray(dataToRender)) {
+                    dataToRender = [];
+                }
 
-                              // Add ID column
-                              newRow.insertCell().textContent = row.id;
+                dataToRender.forEach((row) => {
+                    const newRow = tableBody.insertRow();
 
-                              // Add Score column
-                              newRow.insertCell().textContent = row.score;
+                    // Add ID column
+                    newRow.insertCell().textContent = row.id;
 
-                              // Add Username column
-                              newRow.insertCell().textContent = row.username;
+                    // Add Score column
+                    newRow.insertCell().textContent = row.score;
 
-                              // Add User ID column
-                              newRow.insertCell().textContent = row.user_id;
+                    // Add Username column
+                    newRow.insertCell().textContent = row.username;
 
-                              // Add Roles column
-                              newRow.insertCell().textContent = row.roles; // Join roles as a string
+                    // Add User ID column
+                    newRow.insertCell().textContent = row.user_id;
 
-                              // Add Questions and Answers column with button
-                              const questionsCell = newRow.insertCell();
-                              questionsCell.style.textAlign = "center"; // Horizontally center the button
-                              questionsCell.style.verticalAlign = "middle"; // Vertically center the button.
+                    // Add Roles column
+                    newRow.insertCell().textContent = row.roles; // Join roles as a string
 
-                              const questionsButton = document.createElement("button");
-                              questionsButton.textContent = "View Q&A";
-                              questionsCell.appendChild(questionsButton);
+                    // Add Questions and Answers column with button
+                    const questionsCell = newRow.insertCell();
+                    questionsCell.style.textAlign = "center"; // Horizontally center the button
+                    questionsCell.style.verticalAlign = "middle"; // Vertically center the button.
 
-                              // Add event listener for the Q&A button to open modal
-                              questionsButton.addEventListener("click", () => {
-                                 const modalQuestions = document.getElementById("modalQuestions");
-                                 modalQuestions.innerHTML = ""; // Clear any previous content
+                    const questionsButton = document.createElement("button");
+                    questionsButton.textContent = "View Q&A";
+                    questionsCell.appendChild(questionsButton);
 
-                                 let parsedData;
-                                 try {
-                                    parsedData = JSON.parse(row.questions_answers); // Parse the JSON string
-                                    if (Array.isArray(parsedData)) {
-                                          parsedData.forEach((qa) => {
-                                             const questionDiv = document.createElement("div");
-                                             questionDiv.classList.add("question-answer");
-                                             questionDiv.innerHTML = `
-                              <strong>Q:</strong> ${qa.question_text}<br>
-                              <p><strong>A:</strong> ${qa.answer}</p>
-                           `;
-                                             modalQuestions.appendChild(questionDiv);
-                                          });
-                                    }
-                                 } catch (error) {
-                                    console.error("Error parsing JSON:", error);
-                                 }
+                    // Add event listener for the Q&A button to open modal
+                    questionsButton.addEventListener("click", () => {
+                        const modalQuestions = document.getElementById("modalQuestions");
+                        modalQuestions.innerHTML = ""; // Clear any previous content
 
-                                 modal.style.display = "block"; // Show the modal
-                              });
+                        let parsedData;
+                        try {
+                            parsedData = JSON.parse(row.questions_answers); // Parse the JSON string
+                            if (Array.isArray(parsedData)) {
+                                parsedData.forEach((qa) => {
+                                    const questionDiv = document.createElement("div");
+                                    questionDiv.classList.add("question-answer");
+                                    questionDiv.innerHTML = `
+        <strong>Q:</strong> ${qa.question}<br>
+        <p><strong>A:</strong> ${qa.answer}</p>
+    `;
+                                    modalQuestions.appendChild(questionDiv);
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error parsing JSON:", error);
+                        }
 
-                              // Add State column with dropdown for changing state
-                              const stateCell = newRow.insertCell();
-                              const stateSelect = document.createElement("select");
-                              const states = ["pending", "approved", "rejected"]; // Define available states
-                              states.forEach((state) => {
-                                 const option = document.createElement("option");
-                                 option.value = state;
-                                 option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
-                                 if (row.state === state) {
-                                    option.selected = true; // Set the current state as selected
-                                 }
-                                 stateSelect.appendChild(option);
-                              });
-                              stateCell.appendChild(stateSelect);
+                        modal.style.display = "block"; // Show the modal
+                    });
 
-                              // Add the editable Note field
-                              const noteCell = newRow.insertCell();
-                              const noteInput = document.createElement("input");
-                              noteInput.type = "text";
-                              noteInput.value = row.note || ""; // Set the current note (empty if no note)
-                              noteCell.appendChild(noteInput);
+                    // Add State column with dropdown for changing state
+                    const stateCell = newRow.insertCell();
+                    const stateSelect = document.createElement("select");
+                    const states = ["pending", "approved", "rejected"]; // Define available states
+                    states.forEach((state) => {
+                        const option = document.createElement("option");
+                        option.value = state;
+                        option.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+                        if (row.state === state) {
+                            option.selected = true; // Set the current state as selected
+                        }
+                        stateSelect.appendChild(option);
+                    });
+                    stateCell.appendChild(stateSelect);
 
-                              // Add the Time column
-                              newRow.insertCell().textContent = new Date(row.time).toLocaleString();
+                    // Add the editable Note field
+                    const noteCell = newRow.insertCell();
+                    const noteInput = document.createElement("input");
+                    noteInput.type = "text";
+                    noteInput.value = row.note || ""; // Set the current note (empty if no note)
+                    noteCell.appendChild(noteInput);
 
-                              // Add a button to update the state and note
-                              const updateButtonCell = newRow.insertCell();
-                              const updateButton = document.createElement("button");
-                              updateButton.textContent = "Update";
+                    // Add the Time column
+                    newRow.insertCell().textContent = new Date(row.time).toLocaleString();
 
-                              const deleteButton = document.createElement("button");
-                              deleteButton.textContent = "Delete";
-                              deleteButton.classList.add("delete-button"); // Add a CSS class for styling
+                    // Add a button to update the state and note
+                    const updateButtonCell = newRow.insertCell();
+                    const updateButton = document.createElement("button");
+                    updateButton.textContent = "Update";
 
-                              updateButton.addEventListener("click", () => {
-                                 const newState = stateSelect.value;
-                                 const newNote = noteInput.value;
-                                 updateTicket(row.id, newState, newNote, row.user_id);
-                              });
+                    const deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Delete";
+                    deleteButton.classList.add("delete-button"); // Add a CSS class for styling
 
-                              deleteButton.addEventListener("click", () => {
-                                 showDeleteConfirmation(row.id);
-                              });
+                    updateButton.addEventListener("click", () => {
+                        const newState = stateSelect.value;
+                        const newNote = noteInput.value;
+                        updateTicket(row.id, newState, newNote, row.user_id);
+                    });
 
-                              updateButtonCell.appendChild(updateButton);
-                              updateButtonCell.appendChild(deleteButton);
-                        });
-                     }
+                    deleteButton.addEventListener("click", () => {
+                        showDeleteConfirmation(row.id);
+                    });
+
+                    updateButtonCell.appendChild(updateButton);
+                    updateButtonCell.appendChild(deleteButton);
+                });
+            }
 
             function deleteTicket(ticketId) {
                 if (!ticketId) {
@@ -441,7 +450,18 @@
                         row_id: ticketId,
                     }),
                 })
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (response.ok) {
+                            return response.json(); // Assuming the server returns the updated data after deletion
+                        } else {
+                            throw new Error("Failed to delete ticket");
+                        }
+                    })
+                    .then((data) => {
+                        // Update the table with the new data from the server response
+                        renderTable(data);
+                        showUpdateNotification("Ticket deleted successfully!", "green");
+                    })
                     .catch((error) => {
                         console.error("Error deleting ticket:", error);
                         alert("Error deleting ticket!");
@@ -450,7 +470,7 @@
 
             function updateTicket(ticketId, newState, newNote, user_id) {
                 if (!newNote.trim()) {
-                  showUpdateNotification("Note cannot be empty!","red");
+                    showUpdateNotification("Note cannot be empty!", "red");
                     return;
                 }
 
@@ -468,36 +488,36 @@
                 })
                     .then((response) => {
                         response.json();
-                        showUpdateNotification("Ticket updated successfully!","green");
+                        showUpdateNotification("Ticket updated successfully!", "green");
                     })
                     .catch((error) => {
                         console.error("Error updating ticket:", error);
-                        showUpdateNotification("Failed to update the ticket. Please try again","red");
+                        showUpdateNotification("Failed to update the ticket. Please try again", "red");
                     });
             }
 
-               function refreshTable() {
-                  fetch("/admin/data")
-                  .then((response) => response.json())
-                  .then((data) => {
-                     populateUsernameFilter(data);
-                     renderTable(data); // Call the same renderTable function
-                  })
-                  .catch((error) => console.error("Error fetching data:", error));
-               }
+            function refreshTable() {
+                fetch("/admin/data")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        populateUsernameFilter(data);
+                        renderTable(data); // Call the same renderTable function
+                    })
+                    .catch((error) => console.error("Error fetching data:", error));
+            }
 
             // Update the populateUsernameFilter function to only add unique usernames dynamically
             function populateUsernameFilter(data) {
-                  const usernameFilter = document.getElementById("usernameFilter");
-                  usernameFilter.innerHTML = ''; // Clear the existing options
+                const usernameFilter = document.getElementById("usernameFilter");
+                usernameFilter.innerHTML = ""; // Clear the existing options
 
-                  const uniqueUsernames = [...new Set(data.map((row) => row.username))];
-                  uniqueUsernames.forEach((username) => {
-                     const option = document.createElement("option");
-                     option.value = username;
-                     option.textContent = username;
-                     usernameFilter.appendChild(option);
-                  });
+                const uniqueUsernames = [...new Set(data.map((row) => row.username))];
+                uniqueUsernames.forEach((username) => {
+                    const option = document.createElement("option");
+                    option.value = username;
+                    option.textContent = username;
+                    usernameFilter.appendChild(option);
+                });
             }
 
             // Fetch the initial data to populate the table and filter
@@ -520,8 +540,6 @@
                     });
                 })
                 .catch((error) => console.error("Error fetching data:", error));
-
-
         </script>
     </body>
 </html>

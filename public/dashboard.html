@@ -1,12 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <h1>Dashboard</h1>
-</head>
-<body>
-    
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard</title>
+        <style>
+           
+        </style>
+    </head>
+    <body>
+        <nav>
+            <ul>
+                <li><a href="/dashboard">Home</a></li>
+            </ul>
+        </nav>
+        <main>
+            <div id="adminSection" style="display: none;">
+                <h1>Admin Dashboard</h1>
+                <p>Welcome to the admin panel.</p>
+                <a href="/admin">Admin</a>
+                <!-- Admin-specific content here -->
+            </div>
+            <div id="userSection" style="display: none;">
+                <h1>User Dashboard</h1>
+                <p>Welcome to your dashboard!</p>
+                <!-- User-specific content here -->
+                <a href="/user">user</a>
+            </div>
+            <div id="errorSection" style="display: none;">
+                <h1>Access Denied</h1>
+                <p>You do not have permission to access this content.</p>
+            </div>
+        </main>
+        <script>
+            // Fetch dashboard data from the server
+            fetch("/dashboard-data")
+                .then((res) => res.json())
+                .then((data) => {
+                    if (!data.roles || data.roles.length === 0) {
+                        document.getElementById("errorSection").style.display = "block";
+                        return;
+                    }
+                    // Show sections based on roles
+                    if (data.roles.includes("god")) {
+                        document.getElementById("adminSection").style.display = "block";
+                    }
+                    if (data.roles.includes("testingBot")) {
+                        document.getElementById("userSection").style.display = "block";
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error fetching dashboard data:", err);
+                    document.getElementById("errorSection").style.display = "block";
+                });
+        </script>
+    </body>
 </html>

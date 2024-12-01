@@ -144,7 +144,7 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
-    console.log("Data in /dashboard: " + req.body);
+    console.log("Data in /dashboard: " + JSON.stringify(req.body, null, 2));
     console.log("/dashboard route");
     if (!req.isAuthenticated()) {
         return res.redirect("/default"); // Redirect to login if not authenticated
@@ -331,7 +331,7 @@ app.post("/admin/update-state-and-note", (req, res) => {
 });
 
 app.get("/default",(req, res) => {
-    console.log("default route body: " + req.body);
+    console.log("default route body: " + JSON.stringify(req.body, null, 2));
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard");
     }
@@ -342,7 +342,7 @@ app.get("/default",(req, res) => {
 
 // Default route - automatically redirects to /dashboard if logged in
 app.get("/", (req, res) => {
-    console.log("/ route req.body: " + req.body);
+    console.log("/ route req.body: " + JSON.stringify(req.body, null, 2));
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard"); // If logged in, redirect to dashboard
     } else {

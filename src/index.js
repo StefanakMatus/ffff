@@ -61,17 +61,13 @@ app.use(express.static("public")); // Or any directory where your HTML files are
 app.use(express.json());
 
 // Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            secure: process.env.NODE_ENV === 'production', // Only enable secure cookies in production
-        },
-    })
-);
+
+app.use(session({
+    secret: 'your-secret-key', // Replace with a secure key
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production' } // Secure cookie only for production
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());

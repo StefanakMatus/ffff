@@ -58,51 +58,36 @@ passport.use(
 app.use(express.static("public")); // Or any directory where your HTML files are stored
 app.use(express.json());
 
-
 // Middleware
+app.use(express.urlencoded({ extended: true }));
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === 'production', // Only enable secure cookies in production
+        },
     })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Middleware to attach roles to req.user
 app.use(async (req, res, next) => {
     if (req.isAuthenticated()) {
         try {
             const guildId = process.env.GUILD_ID;
-            const memberUrl = `https://discord.com/api/v10/guilds/${guildId}/members/${req.user.id}`;
-            const rolesUrl = `https://discord.com/api/v10/guilds/${guildId}/roles`;
-            const headers = {
-                Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-            };
+            const guild = client.guilds.cache.get(guildId); // Assuming client is logged in
 
-            // Fetch guild member data
-            const memberResponse = await fetch(memberUrl, { headers });
-            if (!memberResponse.ok) {
-                throw new Error("Failed to fetch guild member data");
+            if (!guild) {
+                throw new Error("Guild not found");
             }
 
-            const memberData = await memberResponse.json();
-            const roleIds = memberData.roles;
+            const member = await guild.members.fetch(req.user.id);
 
-            // Fetch all guild roles
-            const rolesResponse = await fetch(rolesUrl, { headers });
-            if (!rolesResponse.ok) {
-                throw new Error("Failed to fetch guild roles");
-            }
-
-            const rolesData = await rolesResponse.json();
-
-            // Map role IDs to role names
-            const roleNames = roleIds.map((roleId) => {
-                const role = rolesData.find((r) => r.id === roleId);
-                return role ? role.name : "Unknown Role";
-            });
+            // Fetch roles from member object
+            const roleNames = member.roles.cache.map(role => role.name);
 
             // Attach roles to req.user
             req.user.roles = roleNames;
@@ -113,8 +98,8 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// Middleware to parse form data (urlencoded)
-app.use(express.urlencoded({ extended: true }));
+
+
 
 // Login Route (Check if already authenticated)
 app.get("/login", (req, res, next) => {
@@ -141,57 +126,22 @@ app.get("/dashboard-data", async (req, res) => {
         return res.redirect("/login"); // Redirect to login if not authenticated
     }
 
-    const guildId = process.env.GUILD_ID;
-    const memberUrl = `https://discord.com/api/v10/guilds/${guildId}/members/${req.user.id}`;
-    const rolesUrl = `https://discord.com/api/v10/guilds/${guildId}/roles`;
-    const headers = {
-        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+    // Assuming roles have been attached to req.user in the middleware
+    const roleNames = req.user.roles || []; // Default to empty array if no roles
+
+    // Prepare the minimal data
+    const responseData = {
+        username: req.user.username, // Assuming req.user has the username
+        userId: req.user.id,         // Assuming req.user has the id
+        roles: roleNames,
+        isAdmin: roleNames.includes("god"),
+        isUser: roleNames.includes("testingBot"),
     };
 
-    try {
-        // Fetch guild member data
-        const memberResponse = await fetch(memberUrl, { headers });
-        if (!memberResponse.ok) {
-            return res.send("<h1>You are not a member of this server or the bot lacks permissions.</h1>");
-        }
-
-        const memberData = await memberResponse.json();
-
-        // Extract the necessary user details
-        const username = memberData.user.username;
-        const userId = memberData.user.id;
-        const roleIds = memberData.roles;
-
-        // Fetch all guild roles
-        const rolesResponse = await fetch(rolesUrl, { headers });
-        if (!rolesResponse.ok) {
-            return res.status(500).send("Error fetching roles.");
-        }
-
-        const rolesData = await rolesResponse.json();
-
-        // Map role IDs to role names
-        const roleNames = roleIds.map((roleId) => {
-            const role = rolesData.find((r) => r.id === roleId);
-            return role ? role.name : "Unknown Role";
-        });
-
-        // Prepare the minimal data
-        const responseData = {
-            username,
-            userId,
-            roles: roleNames,
-            isAdmin: roleNames.includes("god"),
-            isUser: roleNames.includes("testingBot"),
-        };
-
-        // Send the data as JSON or embed it in the response
-        return res.json(responseData);
-    } catch (error) {
-        console.error("Error fetching guild member data:", error);
-        return res.status(500).send("An error occurred.");
-    }
+    // Send the data as JSON
+    return res.json(responseData);
 });
+
 
 app.get("/dashboard", async (req, res) => {
     if (!req.isAuthenticated()) {

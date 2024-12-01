@@ -328,15 +328,15 @@ app.post("/admin/update-state-and-note", (req, res) => {
     });
 });
 
-app.get("/default",(req, res) => {
-    console.log("default route body: " + JSON.stringify(req.body, null, 2));
-    if (req.isAuthenticated()) {
+app.get("/default", (req, res) => {
+    console.log("Authenticated User: ", req.user);
+    console.log("Is Authenticated: ", req.isAuthenticated ? req.isAuthenticated() : "Not defined");
+    if (req.isAuthenticated && req.isAuthenticated()) {
         return res.redirect("/dashboard");
     }
-
-    // Serve the user HTML file
     return res.sendFile(path.join(__dirname, "..", "public", "default.html"));
 });
+
 
 // Default route - automatically redirects to /dashboard if logged in
 app.get("/", (req, res) => {

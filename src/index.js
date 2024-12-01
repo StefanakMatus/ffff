@@ -66,12 +66,6 @@ app.use(session({
     secret: process.env.SESSION_SECRET, // Use a secure session secret
     resave: false,
     saveUninitialized: true,
-    cookie: {
-        // Only use `secure: true` in production when the app is served over HTTPS
-        secure: process.env.NODE_ENV === 'production',  // true if production, false if development
-        httpOnly: true,  // Prevents JavaScript from accessing cookies
-        sameSite: 'strict', // Helps to prevent CSRF attacks
-    }
 }));
 
 

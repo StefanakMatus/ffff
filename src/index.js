@@ -141,8 +141,8 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
-    console.log("/dashboard route req: " + JSON.stringify(req.body, null, 2));
-    console.log("test: " + req.isAuthenticated());
+    console.log("Authenticated User: ", req.user);
+    console.log("Is Authenticated: ", req.isAuthenticated ? req.isAuthenticated() : "Not defined");
     if (!req.isAuthenticated()) {
         console.log("dashboard failed going back to default?");
         return res.redirect("/default"); // Redirect to login if not authenticated
@@ -329,8 +329,6 @@ app.post("/admin/update-state-and-note", (req, res) => {
 });
 
 app.get("/default", (req, res) => {
-    console.log("Authenticated User: ", req.user);
-    console.log("Is Authenticated: ", req.isAuthenticated ? req.isAuthenticated() : "Not defined");
     if (req.isAuthenticated && req.isAuthenticated()) {
         return res.redirect("/dashboard");
     }

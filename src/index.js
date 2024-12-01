@@ -115,6 +115,7 @@ app.get("/callback", passport.authenticate("discord", {
         failureRedirect: "/default", // Redirect to /login if authentication fails
     }),
     (req, res) => {
+        console.log("/callback starting here?");
         res.redirect("/dashboard"); // Redirect to dashboard after successful login
     }
 );
@@ -144,9 +145,9 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
-    console.log("Data in /dashboard: " + JSON.stringify(req.body, null, 2));
     console.log("/dashboard route");
     if (!req.isAuthenticated()) {
+        console.log("dashboard failed going back to default?");
         return res.redirect("/default"); // Redirect to login if not authenticated
     }
     return res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"));

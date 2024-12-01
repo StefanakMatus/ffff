@@ -113,7 +113,7 @@ app.get("/login", (req, res, next) => {
 // Callback route after Discord login
 app.get("/callback",
     passport.authenticate("discord", {
-        failureRedirect: "/dashboard", // Redirect to /login if authentication fails
+        failureRedirect: "/default", // Redirect to /login if authentication fails
     }),
     (req, res) => {
         res.redirect("/dashboard"); // Redirect to dashboard after successful login
@@ -145,6 +145,7 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
+    console.log("/dashboard route");
     if (!req.isAuthenticated()) {
         return res.redirect("/default"); // Redirect to login if not authenticated
     }
@@ -330,12 +331,14 @@ app.post("/admin/update-state-and-note", (req, res) => {
 });
 
 app.get("/default",(req, res) => {
+    console.log("default route");
     // Serve the user HTML file
     return res.sendFile(path.join(__dirname, "..", "public", "default.html"));
 });
 
 // Default route - automatically redirects to /dashboard if logged in
 app.get("/", (req, res) => {
+    console.log("/ route");
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard"); // If logged in, redirect to dashboard
     } else {

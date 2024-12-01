@@ -7,8 +7,6 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Client, GatewayIntentBits } from "discord.js";
-import compression from 'compression';
-
 
 // Derive __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -24,23 +22,19 @@ const client = new Client({
 // Login to Discord with your bot token
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-// DB connection (replace with your actual credentials)
-const db = mysql.createConnection({
-    host: process.env.DB_HOST, // Host of your online database (e.g., 'your-database-host.com')
-    user: process.env.DB_USER, // Your database username
-    password: process.env.DB_PASSWORD, // Your database password
-    database: process.env.DB_NAME, // Your database name
+// Initialize the connection only once
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     charset: "utf8mb4", // Ensures utf8mb4 encoding
+    connectionLimit: 10, // Allows for concurrent queries without overloading
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error("Database connection error:", err);
-        process.exit(1); // Exit if connection fails
-    } else {
-        console.log("Connected to MySQL database");
-    }
-});
+// No need for db.connect() inside each route anymore, as the pool handles it
+
+
 // Passport setup
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
@@ -63,7 +57,6 @@ passport.use(
 
 app.use(express.static("public")); // Or any directory where your HTML files are stored
 app.use(express.json());
-app.use(compression());
 
 
 // Middleware
@@ -212,13 +205,6 @@ app.get("/admin", (req, res) => {
         return res.redirect("/login"); // Redirect to login if not authenticated
     }
 
-    db.connect((err) => {
-        if (err) {
-            console.error("Database connection error:", err);
-            process.exit(1); // Exit if connection fails
-        }
-    });
-
     // Ensure the user is an admin
     if (!req.user.roles || !req.user.roles.includes("god")) {
         return res.status(403).send("<h1>Access Denied</h1><p>You do not have permission to access the admin page.</p>");
@@ -232,13 +218,6 @@ app.get("/user", (req, res) => {
     if (!req.isAuthenticated()) {
         return res.redirect("/login"); // Redirect to login if not authenticated
     }
-
-    db.connect((err) => {
-        if (err) {
-            console.error("Database connection error:", err);
-            process.exit(1); // Exit if connection fails
-        }
-    });
 
     // Ensure the user has the 'testingBot' role
     if (!req.user.roles || !req.user.roles.includes("testingBot")) {

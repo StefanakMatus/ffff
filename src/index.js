@@ -111,7 +111,6 @@ app.get("/callback", passport.authenticate("discord", {
         failureRedirect: "/default", // Redirect to /login if authentication fails
     }),
     (req, res) => {
-        console.log("/callback starting here?");
         res.redirect("/dashboard"); // Redirect to dashboard after successful login
     }
 );
@@ -141,10 +140,7 @@ app.get("/dashboard-data", async (req, res) => {
 
 
 app.get("/dashboard", async (req, res) => {
-    console.log("Authenticated User: ", req.user);
-    console.log("Is Authenticated: ", req.isAuthenticated ? req.isAuthenticated() : "Not defined");
     if (!req.isAuthenticated()) {
-        console.log("dashboard failed going back to default?");
         return res.redirect("/default"); // Redirect to login if not authenticated
     }
     return res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"));
@@ -338,7 +334,6 @@ app.get("/default", (req, res) => {
 
 // Default route - automatically redirects to /dashboard if logged in
 app.get("/", (req, res) => {
-    console.log("/ route req.body: " + JSON.stringify(req.body, null, 2));
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard"); // If logged in, redirect to dashboard
     } else {

@@ -1,266 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Quiz</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f5f5f5;
-            }
-            .quiz-container {
-                width: 80%;
-                margin: 50px auto;
-                padding: 20px;
-                background-color: #fff;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-            h1 {
-                text-align: center;
-                color: #333;
-            }
-            .question-container {
-                margin-bottom: 20px;
-            }
-            .question-text {
-                font-size: 18px;
-                margin-bottom: 10px;
-            }
-            label {
-                display: block;
-                margin: 5px 0;
-            }
-            .submit-btn {
-                background-color: #4caf50;
-                color: white;
-                padding: 10px 20px;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-                width: 100%;
-            }
-            .submit-btn:hover {
-                background-color: #45a049;
-            }
-            .result-container {
-                text-align: center;
-                margin-top: 30px;
-                padding: 20px;
-                background-color: #e0f7fa;
-                border-radius: 5px;
-            }
-        </style>
-    </head>
-    <body>
-            <nav>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhiteList Application</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Container for the Quiz */
+        .quiz-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        /* Question Styles */
+        .question-container {
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none; /* Prevents resizing */
+        }
+
+        /* Button Styles */
+        .submit-btn {
+            background-color: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .submit-btn:disabled {
+            background-color: #b5d8b2;
+            cursor: not-allowed;
+        }
+
+        /* Result Container */
+        .result-container {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f7fa;
+            border-radius: 5px;
+        }
+
+        /* Input Styles for Better UX */
+        .question-container input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .question-container textarea {
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
         <ul>
             <li><a href="/dashboard">Home</a></li>
         </ul>
     </nav>
-        <h1>Quiz</h1>
-        <div id="quiz-container" class="quiz-container">
-            <!-- Questions will be dynamically inserted here -->
-        </div>
-        <button id="submit-btn" class="submit-btn">Submit Quiz</button>
-        <div id="result" class="result-container" style="display: none;">
-            <p>Your score is: <span id="score"></span>/10</p>
-            <p id="evaluation"></p>
-        </div>
+    <h1>WhiteList Application</h1>
+    <div id="quiz-container" class="quiz-container">
+        <!-- Questions will be dynamically inserted here -->
+    </div>
+    <button id="submit-btn" class="submit-btn">Submit Application</button>
 
-        <script>
-            // Function to fetch both quiz question types from the server and display them
-            async function loadQuiz() {
-                try {
-                    const quizContainer = document.getElementById("quiz-container");
-                    quizContainer.innerHTML = "<p>Loading questions...</p>";
+    <script>
+        async function loadQuiz() {
+            try {
+                const quizContainer = document.getElementById("quiz-container");
+                quizContainer.innerHTML = "<p>Loading questions...</p>";
 
-                    const [responseOptions, responseLong] = await Promise.all([fetch("/user/questions"), fetch("/user/question_long")]);
+                const [responseOptions, responseLong] = await Promise.all([fetch("/user/questions"), fetch("/user/question_long")]);
 
-                    const questionsOptions = await responseOptions.json();
-                    const questionsLong = await responseLong.json();
+                const questionsOptions = await responseOptions.json();
+                const questionsLong = await responseLong.json();
 
-                    quizContainer.innerHTML = "";
-                    const fragment = document.createDocumentFragment();
+                quizContainer.innerHTML = "";
+                const fragment = document.createDocumentFragment();
 
-                    questionsOptions.forEach((question) => {
-                        const questionElement = document.createElement("div");
-                        questionElement.classList.add("question");
-                        questionElement.dataset.id = question.id;
+                questionsOptions.forEach((question) => {
+                    const questionElement = document.createElement("div");
+                    questionElement.classList.add("question");
+                    questionElement.dataset.id = question.id;
 
-                        const questionTitle = document.createElement("h3");
-                        questionTitle.textContent = question.question_text;
-                        questionTitle.classList.add("question-text");
-                        questionElement.appendChild(questionTitle);
+                    const questionTitle = document.createElement("h3");
+                    questionTitle.textContent = question.question_text;
+                    questionTitle.classList.add("question-text");
+                    questionElement.appendChild(questionTitle);
 
-                        const options = ["option_a", "option_b", "option_c", "option_d"];
-                        options.forEach((option) => {
-                            const optionLabel = document.createElement("label");
-                            const optionInput = document.createElement("input");
-                            optionInput.type = "radio";
-                            optionInput.name = `question-${question.id}`;
-                            optionInput.value = option;
+                    const options = ["option_a", "option_b", "option_c", "option_d"];
+                    options.forEach((option) => {
+                        const optionLabel = document.createElement("label");
+                        const optionInput = document.createElement("input");
+                        optionInput.type = "radio";
+                        optionInput.name = `question-${question.id}`;
+                        optionInput.value = option;
 
-                            optionLabel.appendChild(optionInput);
-                            optionLabel.appendChild(document.createTextNode(question[option]));
-                            questionElement.appendChild(optionLabel);
-                        });
-
-                        fragment.appendChild(questionElement);
+                        optionLabel.appendChild(optionInput);
+                        optionLabel.appendChild(document.createTextNode(question[option]));
+                        questionElement.appendChild(optionLabel);
                     });
 
-                    questionsLong.forEach((question) => {
-                        const questionElement = document.createElement("div");
-                        questionElement.classList.add("question");
-                        questionElement.dataset.id = question.id;
+                    fragment.appendChild(questionElement);
+                });
 
-                        const questionTitle = document.createElement("h3");
-                        questionTitle.textContent = question.question_text;
-                        questionTitle.classList.add("question-text");
-                        questionElement.appendChild(questionTitle);
+                questionsLong.forEach((question) => {
+                    const questionElement = document.createElement("div");
+                    questionElement.classList.add("question");
+                    questionElement.dataset.id = question.id;
 
-                        const answerArea = document.createElement("textarea");
-                        answerArea.name = `question-long-${question.id}`;
-                        answerArea.rows = 5;
-                        answerArea.cols = 40;
-                        questionElement.appendChild(answerArea);
+                    const questionTitle = document.createElement("h3");
+                    questionTitle.textContent = question.question_text;
+                    questionTitle.classList.add("question-text");
+                    questionElement.appendChild(questionTitle);
 
-                        fragment.appendChild(questionElement);
-                    });
+                    const answerArea = document.createElement("textarea");
+                    answerArea.name = `question-long-${question.id}`;
+                    answerArea.rows = 5;
+                    questionElement.appendChild(answerArea);
 
-                    quizContainer.appendChild(fragment);
-                } catch (error) {
-                    console.error("Error loading quiz:", error);
-                    quizContainer.innerHTML = "<p>Failed to load questions. Please try again later.</p>";
+                    fragment.appendChild(questionElement);
+                });
+
+                quizContainer.appendChild(fragment);
+            } catch (error) {
+                console.error("Error loading questions:", error);
+                quizContainer.innerHTML = "<p>Failed to load questions. Please try again later.</p>";
+            }
+        }
+
+        async function evaluateQuiz() {
+            const questions = document.querySelectorAll(".question");
+            let formValid = true;
+            let hasUnansweredQuestions = false;
+            const answers = [];
+            const longAnswers = [];
+            const state = "Pending";
+            const note = "";
+
+            questions.forEach((question) => {
+                const selectedOption = question.querySelector("input:checked");
+                const questionId = question.dataset.id;
+
+                if (selectedOption) {
+                    answers.push({ questionId, answer: selectedOption.value });
+                } else if (question.querySelector('input[type="radio"]')) {
+                    hasUnansweredQuestions = true;
                 }
+
+                const textarea = question.querySelector("textarea");
+                if (textarea) {
+                    const answer = textarea.value.trim();
+                    if (answer === "") {
+                        hasUnansweredQuestions = true;
+                    } else {
+                        const questionText = question.querySelector(".question-text").textContent.trim();
+                        longAnswers.push({
+                            question: questionText,
+                            answer: answer,
+                        });
+                    }
+                }
+            });
+
+            if (hasUnansweredQuestions) {
+                alert("You did not fill out everything. Please complete all questions.");
+                formValid = false;
             }
 
-            async function evaluateQuiz() {
-                const questions = document.querySelectorAll(".question");
-                let formValid = true;
-                let hasUnansweredQuestions = false; // Flag to track if any question is unanswered
-                const answers = []; // Store option-based answers as { questionId, answer }
-                const longAnswers = []; // Array to hold long-answer question and answers
-                const state = "Pending"; // Example state
-                const note = ""; // Example note
+            if (!formValid) {
+                return;
+            }
 
-                // Collect answers for option-based questions and long-form questions
-                questions.forEach((question) => {
-                    const selectedOption = question.querySelector("input:checked");
-                    const questionId = question.dataset.id; // The question ID
+            const score = await getScore(answers);
 
-                    if (selectedOption) {
-                        answers.push({ questionId, answer: selectedOption.value });
-                    } else if (question.querySelector('input[type="radio"]')) {
-                        // If an option-based question has no answer, mark as unanswered
-                        hasUnansweredQuestions = true;
-                    }
+            const formData = {
+                score,
+                long_answers: longAnswers,
+                state,
+                note,
+            };
 
-                    // Collect and validate long-form answers
-                    const textarea = question.querySelector("textarea");
-                    if (textarea) {
-                        const answer = textarea.value.trim();
-                        if (answer === "") {
-                            hasUnansweredQuestions = true; // Set flag if the input is empty
-                        } else {
-                            // Get the question text from the h3 element
-                            const questionText = question.querySelector(".question-text").textContent.trim();
+            try {
+                const response = await fetch("/submit-form", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                });
 
-                            // Add the long-answer question and its answer to the array
-                            longAnswers.push({
-                                question: questionText, // Use the question text instead of `Question ${questionId}`
-                                answer: answer,
-                            });
-                        }
+                if (!response.ok) {
+                    throw new Error("Failed to submit the form. Please try again.");
+                }
+
+                alert("Form submitted successfully!");
+                window.location.href = "/user";
+            } catch (error) {
+                console.error("Error submitting the form:", error);
+                alert("There was an error submitting your application. Please try again.");
+            }
+        }
+
+        window.onload = loadQuiz;
+        document.getElementById("submit-btn").addEventListener("click", evaluateQuiz);
+
+        async function getScore(answers) {
+            try {
+                const questionIds = answers.map((answer) => answer.questionId);
+                const response = await fetch("/user/get-correct-answers", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ questionIds }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch correct answers");
+                }
+
+                const correctAnswers = await response.json();
+                let score = 0;
+
+                answers.forEach((answer) => {
+                    const correctAnswer = correctAnswers.find((item) => item.id === parseInt(answer.questionId, 10));
+
+                    if (correctAnswer && answer.answer === correctAnswer.correct_option) {
+                        score++;
                     }
                 });
 
-                // Show a single alert if any question was not filled out
-                if (hasUnansweredQuestions) {
-                    alert("You did not fill out everything. Please complete all questions.");
-                    formValid = false;
-                }
-
-                // If the form is not valid, prevent submission
-                if (!formValid) {
-                    return; // Exit the function to prevent submission
-                }
-
-                // Calculate the score
-                const score = await getScore(answers);
-
-                // Prepare the data to be sent to the server
-                const formData = {
-                    score,
-                    long_answers: longAnswers, // Send formatted long-answer questions and answers
-                    state,
-                    note,
-                };
-
-                try {
-                    // Send the form data to the server
-                    const response = await fetch("/submit-form", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(formData),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error("Failed to submit the form. Please try again.");
-                    }
-
-                    // Show a success message or redirect if needed
-                    alert("Form submitted successfully!");
-                    window.location.href = "/user"; // Redirect to a user page or a different page after submission
-                } catch (error) {
-                    console.error("Error submitting the form:", error);
-                    alert("There was an error submitting your quiz. Please try again.");
-                }
+                return score;
+            } catch (error) {
+                console.error("Error fetching correct answers:", error);
+                alert("There was an error calculating the score. Please try again.");
             }
-
-            window.onload = loadQuiz;
-            document.getElementById("submit-btn").addEventListener("click", evaluateQuiz);
-
-            async function getScore(answers) {
-                try {
-                    // Extract question IDs and user answers
-                    const questionIds = answers.map((answer) => answer.questionId);
-
-                    // Fetch correct answers from the server
-                    const response = await fetch("/user/get-correct-answers", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ questionIds }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch correct answers");
-                    }
-
-                    const correctAnswers = await response.json();
-                    let score = 0;
-
-                    // Calculate the score
-                    answers.forEach((answer) => {
-                        const correctAnswer = correctAnswers.find((item) => item.id === parseInt(answer.questionId, 10));
-
-                        if (correctAnswer && answer.answer === correctAnswer.correct_option) {
-                            score++;
-                        }
-                    });
-
-                    return score;
-                } catch (error) {
-                    console.error("Error fetching correct answers:", error);
-                    alert("There was an error calculating the score. Please try again.");
-                }
-            }
-        </script>
-    </body>
+        }
+    </script>
+</body>
 </html>

@@ -111,8 +111,7 @@ app.get("/login", (req, res, next) => {
 });
 
 // Callback route after Discord login
-app.get("/callback",
-    passport.authenticate("discord", {
+app.get("/callback", passport.authenticate("discord", {
         failureRedirect: "/default", // Redirect to /login if authentication fails
     }),
     (req, res) => {
@@ -332,17 +331,18 @@ app.post("/admin/update-state-and-note", (req, res) => {
 });
 
 app.get("/default",(req, res) => {
+    console.log("default route body: " + req.body);
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard");
     }
-    console.log("default route");
+
     // Serve the user HTML file
     return res.sendFile(path.join(__dirname, "..", "public", "default.html"));
 });
 
 // Default route - automatically redirects to /dashboard if logged in
 app.get("/", (req, res) => {
-    console.log("/ route");
+    console.log("/ route req.body: " + req.body);
     if (req.isAuthenticated()) {
         return res.redirect("/dashboard"); // If logged in, redirect to dashboard
     } else {
